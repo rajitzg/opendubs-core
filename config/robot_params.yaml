@@ -1,0 +1,21 @@
+ll_control_node:
+  ros__parameters:
+    # Mode Switching Channel (PPM)
+    # Manual: < mode_manual_threshold
+    # Velocity: >= mode_manual_threshold AND < mode_auto_threshold
+    # Auto: >= mode_auto_threshold
+    mode_channel: 5
+    mode_manual_threshold: 1200
+    mode_auto_threshold: 1800
+
+    # Input Channels (RC Receiver) - 0-based index if using raw channel array? 
+    # MAVROS RCIn usually 0-indexed in array access, but typical RC channels are 1-based.
+    # Logic in code: msg->channels[input_ch_fwd] so these must be 0-based indices.
+    input_ch_fwd: 1   # Pitch
+    input_ch_lat: 0   # Roll
+    input_ch_yaw: 3   # Yaw
+
+    # Output Channels (goBilda Mixer)
+    output_ch_fwd: 0
+    output_ch_lat: 1
+    output_ch_turn: 2
