@@ -13,11 +13,13 @@ def load_mavros_params(context, *args, **kwargs):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
           
-        params = config.get("mavros_params_loader", {}).get("ros__parameters", {})
+        params = config.get("mavros_params_loader", {})
         
         if not params:
-            print("[WARN] No 'mavros_params' found in config file. Skipping servo setup.")
+            print("[WARN] No '/mavros/params' found in config file. Skipping servo setup.")
             return []
+        
+        params = {"/**": params}
         
         temp_servo_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml')
         yaml.dump(params, temp_servo_config)
