@@ -12,6 +12,7 @@ def generate_launch_description():
         Node(
             package='ll_control',
             executable='ll_control_node',
+            namespace='ll_control',
             name='ll_control_node',
             output='screen',
             parameters=[LaunchConfiguration('config_file')]

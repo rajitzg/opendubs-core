@@ -1,22 +1,24 @@
-ll_control_node:
+ll_control:
+  ll_control_node:
+    ros__parameters:
+      # Mode Switching Channel (PPM)
+      # OFF: < mode_manual_threshold (999)
+      # MANUAL: >= mode_manual_threshold AND < mode_auto_threshold (1499)
+      # AUTO: >= mode_auto_threshold (1999)
+      mode_channel: 4
+      mode_manual_threshold: 1200
+      mode_auto_threshold: 1800
+
+      # Control input RC channels
+      # Remember to change both this and SERVOx_FUNCTION
+      input_ch_fwd: 1   # Pitch
+      input_ch_lat: 0   # Roll
+      input_ch_yaw: 3   # Yaw
+
+mavros_params_loader:
   ros__parameters:
-    # Mode Switching Channel (PPM)
-    # OFF: < mode_manual_threshold (999)
-    # MANUAL: >= mode_manual_threshold AND < mode_auto_threshold (1499)
-    # AUTO: >= mode_auto_threshold (1999)
-    mode_channel: 4
-    mode_manual_threshold: 1200
-    mode_auto_threshold: 1800
-
-    # Control input RC channels
-    # Remember to change both this and SERVOx_FUNCTION
-    input_ch_fwd: 1   # Pitch
-    input_ch_lat: 0   # Roll
-    input_ch_yaw: 3   # Yaw
-
-mavros_params:
-  # SERVO[output channel]_FUNCTION: 51 + [input channel]
-  # Remember to change both this and input_ch_x
-  SERVO1_FUNCTION: 52 # fwd
-  SERVO2_FUNCTION: 51 # lat
-  SERVO3_FUNCTION: 54 # yaw
+    # SERVO[output channel]_FUNCTION: 51 + [input channel]
+    # Remember to change both this and input_ch_x
+    SERVO1_FUNCTION: 52 # fwd
+    SERVO2_FUNCTION: 51 # lat
+    SERVO3_FUNCTION: 54 # yaw

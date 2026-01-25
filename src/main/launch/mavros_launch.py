@@ -13,7 +13,7 @@ def load_mavros_params(context, *args, **kwargs):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
           
-        params = config.get("mavros_params", {})
+        params = config.get("mavros_params_loader", {}).get("ros__parameters", {})
         
         if not params:
             print("[WARN] No 'mavros_params' found in config file. Skipping servo setup.")
