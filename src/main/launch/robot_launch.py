@@ -3,7 +3,6 @@ from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
@@ -28,11 +27,12 @@ def generate_launch_description():
             launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
         ),
         IncludeLaunchDescription(
-            XMLLaunchDescriptionSource([
+            PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
-                    FindPackageShare('main'), 'launch', 'apm.launch'
+                    FindPackageShare('main'), 'launch', 'mavros_launch.py'
                 ])
             ]),
+            launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
         ),
     ]
     

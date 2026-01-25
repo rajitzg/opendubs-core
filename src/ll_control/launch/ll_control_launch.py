@@ -5,9 +5,10 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     
-    DeclareLaunchArgument("config_file")
+    config_launch_arg = DeclareLaunchArgument("config_file")
     
     return LaunchDescription([
+        config_launch_arg,
         Node(
             package='ll_control',
             executable='ll_control_node',

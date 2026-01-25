@@ -8,11 +8,15 @@ ll_control_node:
     mode_manual_threshold: 1200
     mode_auto_threshold: 1800
 
+    # Control input RC channels
+    # Remember to change both this and SERVOx_FUNCTION
     input_ch_fwd: 1   # Pitch
     input_ch_lat: 0   # Roll
     input_ch_yaw: 3   # Yaw
 
-    # Output Channels (goBilda Mixer)
-    output_ch_fwd: 0
-    output_ch_lat: 1
-    output_ch_turn: 2
+mavros_params:
+  # SERVO[output channel]_FUNCTION: 51 + [input channel]
+  # Remember to change both this and input_ch_x
+  SERVO1_FUNCTION: 52 # fwd
+  SERVO2_FUNCTION: 51 # lat
+  SERVO3_FUNCTION: 54 # yaw
