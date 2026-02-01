@@ -1,0 +1,3 @@
+[submodule "src/open_dubs_mocap"]
+	path = src/open_dubs_mocap
+	url = https://github.com/EricJGoossen/open_dubs_mocap.git
