@@ -34,6 +34,13 @@ def generate_launch_description():
             ]),
             launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
         ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('diagnostics'), 'launch', 'diagnostics_launch.py'
+                ])
+            ]),
+        ),
     ]
     
     return LaunchDescription(launch_arguments + launches)

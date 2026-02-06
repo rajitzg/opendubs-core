@@ -1,0 +1,51 @@
+diagnostic_aggregator:
+  ros__parameters:
+    pub_rate: 1.0
+    base_path: ""
+    analyzers:
+      sensors:
+        type: diagnostic_aggregator/AnalyzerGroup
+        path: Sensors
+        analyzers:
+          sensor_status:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: Sensor Status
+             contains: ["Sensor Status"]
+             timeout: 5.0
+             warn_nosig: true
+          input_status:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: Input Status
+             contains: ["Input Status"]
+             timeout: 5.0
+             warn_nosig: true
+      
+      mavros:
+        type: diagnostic_aggregator/AnalyzerGroup
+        path: MAVROS
+        analyzers:
+          heartbeat:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: Heartbeat
+             contains: ["Heartbeat"]
+             timeout: 10.0
+          system:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: System
+             contains: ["System", "FCU"]
+             timeout: 10.0
+          battery:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: Battery
+             contains: ["Battery"]
+             timeout: 10.0
+          gps:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: GPS
+             contains: ["GPS", "Satellites"]
+             timeout: 10.0
+          catchall:
+             type: diagnostic_aggregator/GenericAnalyzer
+             path: Misc
+             contains: ["mavros"]
+             timeout: 10.0

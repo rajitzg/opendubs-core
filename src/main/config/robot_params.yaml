@@ -1,19 +1,51 @@
 ll_control:
   ll_control_node:
     ros__parameters:
-      # Mode Switching Channel (PPM)
-      # OFF: < mode_manual_threshold (999)
-      # MANUAL: >= mode_manual_threshold AND < mode_auto_threshold (1499)
-      # AUTO: >= mode_auto_threshold (1999)
-      mode_channel: 4
-      mode_manual_threshold: 1200
-      mode_auto_threshold: 1800
+      # Mode Switching (MAVROS State Strings)
+      mode_map_manual: "MANUAL"
+      mode_map_velocity: "ACRO"  # or STEERING
+      mode_map_auto: "AUTO"      # or GUIDED/HOLD
 
-      # Control input RC channels
-      # Remember to change both this and SERVOx_FUNCTION
+      # Input Channels (RC Receiver)
       input_ch_fwd: 1   # Pitch
       input_ch_lat: 0   # Roll
       input_ch_yaw: 3   # Yaw
+
+      # Output Channels (goBilda Mixer)
+      output_ch_fwd: 0
+      output_ch_lat: 1
+      output_ch_turn: 2
+
+      # Tuning
+      input_deadband: 0.05
+      
+      # Velocity Limits & PID
+      pid_vel_x:
+        max_output: 1.0 # m/s (Max Physical Velocity)
+        k_p: 0.0         # Feedforward only
+        k_i: 0.0
+        k_d: 0.0
+        k_ff: 1.0       # 1.0 m/s -> 1.0 Normalized Output (Full Power)
+      
+      pid_vel_y:
+        max_output: 1.0 # m/s
+        k_p: 0.0
+        k_i: 0.0
+        k_d: 0.0
+        k_ff: 1.0
+
+      pid_yaw_rate:
+        max_output: 1.57 # rad/s (~90 deg/s)
+        k_p: 1.0         # 1.0 rad/s error -> 1.0 Normalized Effort (Full Power)
+        k_i: 0.1         # Integral accumulation
+        k_d: 0.0
+        k_ff: 0.0
+      
+      # Safety
+      rc_timeout_threshold: 0.2
+      imu_timeout_threshold: 0.2
+      imu_freq_threshold: 0.9
+      imu_target_freq: 50.0
 
 mavros_params_loader:
   ros__parameters:
