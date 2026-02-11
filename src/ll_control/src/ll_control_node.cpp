@@ -125,13 +125,15 @@ void LLControlNode::stateCallback(const mavros_msgs::msg::State::SharedPtr msg) 
 }
 
 void LLControlNode::rcCallback(const mavros_msgs::msg::RCIn::SharedPtr msg) {
-    last_rc_msg_time_ = this->now();
-
     // Update setpoints from sticks
     if (msg->channels.size() > static_cast<size_t>(std::max({input_ch_fwd_, input_ch_lat_, input_ch_yaw_}))) {
         rc_fwd_ = msg->channels[input_ch_fwd_];
         rc_lat_ = msg->channels[input_ch_lat_];
         rc_yaw_ = msg->channels[input_ch_yaw_];
+
+        if (msg->channels[2] == 900) { // throttle channel
+            last_rc_msg_time_ = this->now();
+        }
     }
 }
 
@@ -232,6 +234,7 @@ void LLControlNode::controlLoop() {
             out_fwd = rc_fwd_;
             out_lat = rc_lat_;
             out_yaw = rc_yaw_;
+            break;
                 
         case ControlMode::VELOCITY:
         {

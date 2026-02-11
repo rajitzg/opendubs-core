@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include "rclcpp/rclcpp.hpp"
 
 namespace ll_control {
 
@@ -43,18 +42,14 @@ public:
      * @return double Control effort (-1.0 to 1.0)
      */
     double calculate(double input_norm, double feedback, double dt) {
-        auto logger = rclcpp::get_logger("pid_controller");
         // 1. Apply Deadband to Input
         double cmd = applyDeadband(input_norm, config_.deadband);
 
         // 2. Map to Target Physical Velocity
         double target = cmd * config_.max_output;
 
-        RCLCPP_INFO(logger, "target: %f", target);
-
         // 3. Compute Error
         double error = target - feedback;
-        RCLCPP_INFO(logger, "error: %f", error);
 
         // 4. Update Integral
         state_.integral += error * dt;

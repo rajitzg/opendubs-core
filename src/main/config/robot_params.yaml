@@ -60,5 +60,5 @@ mavros_params_loader:
     MODE2: 0
     MODE3: 1
     MODE4: 1
-    MODE5: 3
-    MODE6: 3
+    MODE5: 10
+    MODE6: 10
