@@ -211,7 +211,7 @@ void LLControlNode::controlLoop() {
         } else if (imu_slow) {
             RCLCPP_WARN(this->get_logger(), "IMU rate low: %.1f Hz. Switching to MANUAL and attempting to fix rate.", current_imu_freq_);
             std::thread([this]() { 
-                std::string cmd = "ros2 run mavros mavsys rate --all " + std::to_string(static_cast<int>(this->imu_target_freq_));
+                std::string cmd = "ros2 run mavros mav sys rate --all " + std::to_string(static_cast<int>(this->imu_target_freq_));
                 std::system(cmd.c_str()); 
             }).detach();
             current_mode_ = ControlMode::MANUAL;
@@ -229,8 +229,9 @@ void LLControlNode::controlLoop() {
 
     switch (current_mode_) {
         case ControlMode::MANUAL:
-            // values automatically passed through
-            return;
+            out_fwd = rc_fwd_;
+            out_lat = rc_lat_;
+            out_yaw = rc_yaw_;
                 
         case ControlMode::VELOCITY:
         {
