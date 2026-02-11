@@ -23,7 +23,7 @@ namespace ll_control {
     class LLControlNode : public rclcpp::Node {
     public:
         LLControlNode();
-        virtual ~LLControlNode() = default;
+        virtual ~LLControlNode();
 
     private:
         // Callbacks

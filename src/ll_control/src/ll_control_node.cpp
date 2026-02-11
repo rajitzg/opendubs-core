@@ -98,6 +98,21 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     RCLCPP_INFO(this->get_logger(), "LL Control Node initialized.");
 }
 
+LLControlNode::~LLControlNode() {
+    RCLCPP_WARN(this->get_logger(), "Shutting down LL Control Node. Resetting RC Overrides to Neutral (1500).");
+    auto msg = mavros_msgs::msg::OverrideRCIn();
+    std::fill(msg.channels.begin(), msg.channels.end(), 65535);
+    
+    // Set outputs to Neutral (1500) instead of Release (0) which would fall back to bad RC Input
+    msg.channels[output_ch_fwd_] = 1500;
+    msg.channels[output_ch_lat_] = 1500;
+    msg.channels[output_ch_turn_] = 1500;
+    
+    rc_override_pub_->publish(msg);
+    // Give it a moment to publish
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
 void LLControlNode::stateCallback(const mavros_msgs::msg::State::SharedPtr msg) {
     if (msg->mode == mode_map_manual_) {
         if (current_mode_ != ControlMode::MANUAL) {
