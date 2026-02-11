@@ -131,7 +131,7 @@ void LLControlNode::rcCallback(const mavros_msgs::msg::RCIn::SharedPtr msg) {
         rc_lat_ = msg->channels[input_ch_lat_];
         rc_yaw_ = msg->channels[input_ch_yaw_];
 
-        if (msg->channels[2] == 900) { // throttle channel
+        if (msg->channels[2] != 900) { // throttle channel
             last_rc_msg_time_ = this->now();
         }
     }
