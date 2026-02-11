@@ -11,10 +11,10 @@ ll_control:
       input_ch_lat: 0   # Roll
       input_ch_yaw: 3   # Yaw
 
-      # Output Channels (goBilda Mixer)
-      output_ch_fwd: 0
-      output_ch_lat: 1
-      output_ch_turn: 2
+      # Override Channels
+      output_ch_fwd: 8
+      output_ch_lat: 9
+      output_ch_turn: 10
 
       # Tuning
       input_deadband: 0.05
@@ -50,10 +50,10 @@ ll_control:
 mavros_params_loader:
   ros__parameters:
     # SERVO[output channel]_FUNCTION: 51 + [input channel]
-    # Remember to change both this and input_ch_x
-    SERVO1_FUNCTION: 52 # fwd
-    SERVO2_FUNCTION: 51 # lat
-    SERVO3_FUNCTION: 54 # yaw
+    # corresponds to override channels
+    SERVO1_FUNCTION: 59 # fwd
+    SERVO2_FUNCTION: 60 # lat
+    SERVO3_FUNCTION: 61 # yaw
 
     MODE_CH: 5
     MODE1: 0
