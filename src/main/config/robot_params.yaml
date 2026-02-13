@@ -1,10 +1,11 @@
 ll_control:
   ll_control_node:
     ros__parameters:
-      # Mode Switching (MAVROS State Strings)
-      mode_map_manual: "MANUAL"
-      mode_map_velocity: "ACRO"  # or STEERING
-      mode_map_auto: "AUTO"      # or GUIDED/HOLD
+      # Mode Switching (RC Channel PWM)
+      input_ch_mode: 4          # Channel 5 (0-indexed 4)
+      mode_pwm_manual_threshold: 1300
+      mode_pwm_auto_threshold: 1700
+      mode_hold_name: "HOLD"
 
       # Input Channels (RC Receiver)
       input_ch_fwd: 1   # Pitch
@@ -12,12 +13,13 @@ ll_control:
       input_ch_yaw: 3   # Yaw
 
       # Override Channels
-      output_ch_fwd: 8
-      output_ch_lat: 9
-      output_ch_turn: 10
+      output_ch_fwd: 1
+      output_ch_lat: 0
+      output_ch_turn: 3
 
       # Tuning
       input_deadband: 0.05
+      input_threshold_throttle: 900
       
       # Velocity Limits & PID
       pid_vel_x:
@@ -51,14 +53,20 @@ mavros_params_loader:
   ros__parameters:
     # SERVO[output channel]_FUNCTION: 51 + [input channel]
     # corresponds to override channels
-    SERVO1_FUNCTION: 59 # fwd
-    SERVO2_FUNCTION: 60 # lat
-    SERVO3_FUNCTION: 61 # yaw
+    SERVO1_FUNCTION: 33 # FL
+    SERVO2_FUNCTION: 34 # FR
+    SERVO3_FUNCTION: 35 # BL
+    SERVO4_FUNCTION: 36 # BR
+
+    RC1_TRIM: 1500
+    RC2_TRIM: 1500
+    RC3_TRIM: 1500
+    RC4_TRIM: 1500
 
     MODE_CH: 5
     MODE1: 0
     MODE2: 0
-    MODE3: 1
-    MODE4: 1
-    MODE5: 10
-    MODE6: 10
+    MODE3: 0
+    MODE4: 0
+    MODE5: 0
+    MODE6: 0

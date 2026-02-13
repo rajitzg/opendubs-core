@@ -11,6 +11,7 @@
 #include "ll_control/pid_controller.hpp"
 #include <cstdlib>
 #include <diagnostic_updater/diagnostic_updater.hpp>
+#include "mavros_msgs/srv/set_mode.hpp"
 
 namespace ll_control {
 
@@ -29,20 +30,22 @@ namespace ll_control {
         // Callbacks
         void rcCallback(const mavros_msgs::msg::RCIn::SharedPtr msg);
         void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
-        void stateCallback(const mavros_msgs::msg::State::SharedPtr msg);
         void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
         void controlLoop();
 
         // Diagnostics
         void publishInputStatus(diagnostic_updater::DiagnosticStatusWrapper &stat);
         void publishSensorStatus(diagnostic_updater::DiagnosticStatusWrapper &stat);
+        
+        // Helper
+        void setArduPilotMode(const std::string& mode);
 
         // Subscribers & Publishers
         rclcpp::Subscription<mavros_msgs::msg::RCIn>::SharedPtr rc_sub_;
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_; // Placeholder for Pinpoint/Odom
-        rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr state_sub_;
         rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
         rclcpp::Publisher<mavros_msgs::msg::OverrideRCIn>::SharedPtr rc_override_pub_;
+        rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_mode_client_;
         rclcpp::TimerBase::SharedPtr timer_;
 
         // internal state
@@ -64,10 +67,12 @@ namespace ll_control {
         double prev_control_loop_time_{0.0};
         
         // Parameters
-        // Mode switch via State string
-        std::string mode_map_manual_{"MANUAL"};
-        std::string mode_map_velocity_{"ACRO"}; // User can set to STEERING
-        std::string mode_map_auto_{"AUTO"};     // User can set to GUIDED/HOLD
+        // Mode switch via RC Channel
+        int input_ch_mode_{4}; // Channel 5
+        int mode_pwm_manual_threshold_{1300};
+        int mode_pwm_auto_threshold_{1700};
+        
+        std::string mode_hold_name_{"HOLD"}; // For watchdog/shutdown
 
         // Input mapping
         int input_ch_fwd_{1};
@@ -81,6 +86,7 @@ namespace ll_control {
 
         // Tuning
         double input_deadband_{0.05}; // 5% deadband (normalized 0-1)
+        int input_threshold_throttle_{900};
 
         // Safety / Timeout
         rclcpp::Time last_rc_msg_time_;
