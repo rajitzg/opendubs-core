@@ -11,12 +11,7 @@ ll_control:
       input_ch_fwd: 1   # Pitch
       input_ch_lat: 0   # Roll
       input_ch_yaw: 3   # Yaw
-
-      # Override Channels
-      output_ch_fwd: 1
-      output_ch_lat: 0
-      output_ch_turn: 3
-
+      
       # Tuning
       input_deadband: 0.05
       input_threshold_throttle: 900

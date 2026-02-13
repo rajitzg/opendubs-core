@@ -15,11 +15,6 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     input_ch_fwd_ = this->declare_parameter("input_ch_fwd", input_ch_fwd_);
     input_ch_lat_ = this->declare_parameter("input_ch_lat", input_ch_lat_);
     input_ch_yaw_ = this->declare_parameter("input_ch_yaw", input_ch_yaw_);
-    
-    // Output Mapping
-    output_ch_fwd_ = this->declare_parameter("output_ch_fwd", output_ch_fwd_);
-    output_ch_lat_ = this->declare_parameter("output_ch_lat", output_ch_lat_);
-    output_ch_turn_ = this->declare_parameter("output_ch_turn", output_ch_turn_);
 
     // Deadband
     input_deadband_ = this->declare_parameter("input_deadband", input_deadband_);
@@ -82,8 +77,8 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
         std::bind(&LLControlNode::imuCallback, this, std::placeholders::_1));
 
     // Initialize publisher
-    rc_override_pub_ = this->create_publisher<mavros_msgs::msg::OverrideRCIn>(
-        "/mavros/rc/override", 10);
+    manual_control_pub_ = this->create_publisher<mavros_msgs::msg::ManualControl>(
+        "/mavros/manual_control/send", 10);
         
     // Initialize service client
     set_mode_client_ = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
@@ -110,15 +105,13 @@ LLControlNode::~LLControlNode() {
     // Switch to HOLD mode
     setArduPilotMode(mode_hold_name_);
 
-    auto msg = mavros_msgs::msg::OverrideRCIn();
-    std::fill(msg.channels.begin(), msg.channels.end(), 65535);
-    
-    // Set outputs to Neutral (1500)
-    msg.channels[output_ch_fwd_] = 1500;
-    msg.channels[output_ch_lat_] = 1500;
-    msg.channels[output_ch_turn_] = 1500;
-    
-    rc_override_pub_->publish(msg);
+    // Switch to HOLD mode
+    setArduPilotMode(mode_hold_name_);
+
+    auto msg = mavros_msgs::msg::ManualControl();
+    msg.header.stamp = this->now();
+    msg.x = 0; msg.y = 0; msg.z = 0; msg.r = 0;
+    manual_control_pub_->publish(msg);
     // Give it a moment to publish
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
@@ -213,11 +206,9 @@ void LLControlNode::publishSensorStatus(diagnostic_updater::DiagnosticStatusWrap
 }
 
 void LLControlNode::controlLoop() {
-    auto msg = mavros_msgs::msg::OverrideRCIn();
+    auto msg = mavros_msgs::msg::ManualControl();
+    msg.header.stamp = this->now();
     
-    // Initialize all to UINT16_MAX (ignore)
-    std::fill(msg.channels.begin(), msg.channels.end(), 65535);
-
     double now_sec = this->now().seconds();
     bool rc_timeout = (now_sec - last_rc_msg_time_.seconds()) > rc_timeout_threshold_;
     bool imu_timeout = (now_sec - last_imu_msg_time_.seconds()) > imu_timeout_threshold_;
@@ -228,28 +219,22 @@ void LLControlNode::controlLoop() {
         setArduPilotMode(mode_hold_name_);
         
         // Output Neutral
-        msg.channels[output_ch_fwd_] = 1500; 
-        msg.channels[output_ch_lat_] = 1500;
-        msg.channels[output_ch_turn_] = 1500;
-        rc_override_pub_->publish(msg);
+        msg.x = 0; msg.y = 0; msg.z = 0; msg.r = 0;
+        manual_control_pub_->publish(msg);
         return; 
     }
 
     if (current_mode_ != ControlMode::MANUAL) {
         if (imu_timeout) {
-            RCLCPP_ERROR(this->get_logger(), "CRITICAL: IMU Lost! Switching to HOLD.");
+             RCLCPP_ERROR(this->get_logger(), "CRITICAL: IMU Lost! Switching to HOLD.");
             setArduPilotMode(mode_hold_name_);
             
             // Output Neutral
-            msg.channels[output_ch_fwd_] = 1500; 
-            msg.channels[output_ch_lat_] = 1500;
-            msg.channels[output_ch_turn_] = 1500;
-            rc_override_pub_->publish(msg);
+            msg.x = 0; msg.y = 0; msg.z = 0; msg.r = 0;
+            manual_control_pub_->publish(msg);
             return;
         } else if (imu_slow) {
             RCLCPP_WARN(this->get_logger(), "IMU rate low: %.1f Hz. Attempting to fix rate.", current_imu_freq_);
-            // Don't kill everything for slow IMU, but maybe switch to manual?
-            // For now, let's just warn and try to fix.
              std::thread([this]() { 
                 std::string cmd = "ros2 run mavros mav sys rate --all " + std::to_string(static_cast<int>(this->imu_target_freq_));
                 std::system(cmd.c_str()); 
@@ -257,9 +242,9 @@ void LLControlNode::controlLoop() {
         }
     }
 
-    uint16_t out_fwd = 1500;
-    uint16_t out_lat = 1500;
-    uint16_t out_yaw = 1500;
+    double out_fwd = 0.0;
+    double out_lat = 0.0;
+    double out_yaw = 0.0;
 
     // Calculate DT for control loop
     double dt = now_sec - prev_control_loop_time_;
@@ -268,9 +253,10 @@ void LLControlNode::controlLoop() {
 
     switch (current_mode_) {
         case ControlMode::MANUAL:
-            out_fwd = rc_fwd_;
-            out_lat = rc_lat_;
-            out_yaw = rc_yaw_;
+            // Normalize RC (1000..2000) to (-1.0..1.0)
+            out_fwd = (static_cast<double>(rc_fwd_) - 1500.0) / 500.0;
+            out_lat = (static_cast<double>(rc_lat_) - 1500.0) / 500.0;
+            out_yaw = (static_cast<double>(rc_yaw_) - 1500.0) / 500.0;
             break;
                 
         case ControlMode::VELOCITY:
@@ -279,32 +265,38 @@ void LLControlNode::controlLoop() {
             // 1. Calc Normalized Output
             double yaw_norm_in = (static_cast<double>(rc_yaw_) - 1500.0) / 500.0;
             double yaw_effort = pid_yaw_.calculate(yaw_norm_in, current_yaw_rate_, dt);
-            out_yaw = 1500 + static_cast<int>(yaw_effort * 500.0);
+            out_yaw = yaw_effort;
             
             // Fwd/Lat (Open Loop for now)
             double fwd_norm_in = (static_cast<double>(rc_fwd_) - 1500.0) / 500.0;
             double fwd_effort = pid_x_.calculate(fwd_norm_in, 0.0 /*No Odom yet*/, dt);
-            out_fwd = 1500 + static_cast<int>(fwd_effort * 500.0);
+            out_fwd = fwd_effort;
 
             double lat_norm_in = (static_cast<double>(rc_lat_) - 1500.0) / 500.0;
             double lat_effort = pid_y_.calculate(lat_norm_in, 0.0 /*No Odom yet*/, dt);
-            out_lat = 1500 + static_cast<int>(lat_effort * 500.0);
+            out_lat = lat_effort;
             
             break;
         }
             
         case ControlMode::AUTO:
             // TODO: implement auto logic
-            // pwm signals stay at 1500
+            // efforts stay at 0.0
             break;
     }
 
-    // Assign to mapped output channels
-    if (output_ch_fwd_ < 18) msg.channels[output_ch_fwd_] = out_fwd;
-    if (output_ch_lat_ < 18) msg.channels[output_ch_lat_] = out_lat;
-    if (output_ch_turn_ < 18) msg.channels[output_ch_turn_] = out_yaw;
+    // Clamp efforts -1.0 to 1.0
+    out_fwd = std::max(-1.0, std::min(1.0, out_fwd));
+    out_lat = std::max(-1.0, std::min(1.0, out_lat));
+    out_yaw = std::max(-1.0, std::min(1.0, out_yaw));
 
-    rc_override_pub_->publish(msg);
+    // Assign to ManualControl message (-1000 to 1000)
+    msg.x = static_cast<float>(out_fwd * 1000.0);
+    msg.y = static_cast<float>(out_lat * 1000.0);
+    msg.r = static_cast<float>(out_yaw * 1000.0);
+    msg.z = 0.0; // Throttle neutral/zero
+
+    manual_control_pub_->publish(msg);
 }
 
 
