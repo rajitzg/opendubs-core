@@ -76,7 +76,7 @@ mavros_params_loader:
     MODE5: 0
     MODE6: 0
 
-    FS_ACTION: 0
+    FS_ACTION: 2
     FS_GCS_ENABLE: 1
-    FS_GCS_TIMEOUT: 0.5
-    FS_GCS_ACTION: 2
+    FS_THR_ENABLE: 0
+    
