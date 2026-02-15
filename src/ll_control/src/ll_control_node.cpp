@@ -102,6 +102,10 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     updater_.setHardwareID("ll_controller");
     updater_.add("Input Status", this, &LLControlNode::publishInputStatus);
     updater_.add("Sensor Status", this, &LLControlNode::publishSensorStatus);
+            
+    // Parameter Callback
+    params_callback_handle_ = this->add_on_set_parameters_callback(
+        std::bind(&LLControlNode::parametersCallback, this, std::placeholders::_1));
         
     RCLCPP_INFO(this->get_logger(), "LL Control Node initialized.");
 }
@@ -253,6 +257,7 @@ void LLControlNode::controlLoop() {
             return;
         } else if (imu_slow) {
             if (now_sec - last_freq_fix_time_.seconds() > imu_fix_period_) {
+                last_freq_fix_time_ = this->now();
                 RCLCPP_WARN(this->get_logger(), "IMU rate low: %.1f Hz. Attempting to fix rate.", current_imu_freq_);
                 std::thread([this]() { 
                     std::string cmd = "ros2 run mavros mav sys rate --all " + std::to_string(static_cast<int>(this->imu_target_freq_));
@@ -334,6 +339,92 @@ void LLControlNode::setArduPilotMode(const std::string& mode) {
     };
     
     set_mode_client_->async_send_request(request, response_received_callback);
+}
+
+rcl_interfaces::msg::SetParametersResult LLControlNode::parametersCallback(const std::vector<rclcpp::Parameter> &parameters) {
+    rcl_interfaces::msg::SetParametersResult result;
+    result.successful = true;
+    result.reason = "success";
+    
+    // Check for PID updates
+    // We iterate through all changed params and update configs accordingly
+    
+    // X Velocity
+    PidConfig cfg_x = pid_x_.getConfig();
+    bool update_x = false;
+    
+    // Y Velocity
+    PidConfig cfg_y = pid_y_.getConfig();
+    bool update_y = false;
+    
+    // Yaw Rate
+    PidConfig cfg_yaw = pid_yaw_.getConfig();
+    bool update_yaw = false;
+
+    // Tuning Params
+    bool update_tuning = false;
+
+    for (const auto &param : parameters) {
+        std::string name = param.get_name();
+        
+        // PID X
+        if (name == "pid_vel_x.k_p") { cfg_x.k_p = param.as_double(); update_x = true; }
+        else if (name == "pid_vel_x.k_i") { cfg_x.k_i = param.as_double(); update_x = true; }
+        else if (name == "pid_vel_x.k_d") { cfg_x.k_d = param.as_double(); update_x = true; }
+        else if (name == "pid_vel_x.k_ff") { cfg_x.k_ff = param.as_double(); update_x = true; }
+        else if (name == "pid_vel_x.max_output") { cfg_x.max_output = param.as_double(); update_x = true; }
+        
+        // PID Y
+        else if (name == "pid_vel_y.k_p") { cfg_y.k_p = param.as_double(); update_y = true; }
+        else if (name == "pid_vel_y.k_i") { cfg_y.k_i = param.as_double(); update_y = true; }
+        else if (name == "pid_vel_y.k_d") { cfg_y.k_d = param.as_double(); update_y = true; }
+        else if (name == "pid_vel_y.k_ff") { cfg_y.k_ff = param.as_double(); update_y = true; }
+        else if (name == "pid_vel_y.max_output") { cfg_y.max_output = param.as_double(); update_y = true; }
+        
+        // PID Yaw
+        else if (name == "pid_yaw_rate.k_p") { cfg_yaw.k_p = param.as_double(); update_yaw = true; }
+        else if (name == "pid_yaw_rate.k_i") { cfg_yaw.k_i = param.as_double(); update_yaw = true; }
+        else if (name == "pid_yaw_rate.k_d") { cfg_yaw.k_d = param.as_double(); update_yaw = true; }
+        else if (name == "pid_yaw_rate.k_ff") { cfg_yaw.k_ff = param.as_double(); update_yaw = true; }
+        else if (name == "pid_yaw_rate.max_output") { cfg_yaw.max_output = param.as_double(); update_yaw = true; }
+        
+        // Tuning
+        else if (name == "input_deadband") { input_deadband_ = param.as_double(); update_tuning = true; }
+        else if (name == "input_threshold_throttle") { input_threshold_throttle_ = param.as_int(); }
+        
+        // Mode thresholds
+        else if (name == "mode_pwm_manual_threshold") { mode_pwm_manual_threshold_ = param.as_int(); }
+        else if (name == "mode_pwm_auto_threshold") { mode_pwm_auto_threshold_ = param.as_int(); }
+        else if (name == "input_ch_mode") { input_ch_mode_ = param.as_int(); }
+        
+        // Safety
+        else if (name == "rc_timeout_threshold") { rc_timeout_threshold_ = param.as_double(); }
+        else if (name == "imu_timeout_threshold") { imu_timeout_threshold_ = param.as_double(); }
+        else if (name == "imu_fix_period") { imu_fix_period_ = param.as_double(); }
+        else if (name == "imu_target_freq") { imu_target_freq_ = param.as_double(); }
+    }
+    
+    if (update_tuning) {
+        cfg_x.deadband = input_deadband_;
+        cfg_y.deadband = input_deadband_;
+        cfg_yaw.deadband = input_deadband_;
+        update_x = true; update_y = true; update_yaw = true;
+    }
+
+    if (update_x) {
+        pid_x_.configure(cfg_x);
+        RCLCPP_INFO(this->get_logger(), "Updated PID X: P=%.2f I=%.2f D=%.2f FF=%.2f", cfg_x.k_p, cfg_x.k_i, cfg_x.k_d, cfg_x.k_ff);
+    }
+    if (update_y) {
+        pid_y_.configure(cfg_y);
+        RCLCPP_INFO(this->get_logger(), "Updated PID Y: P=%.2f I=%.2f D=%.2f FF=%.2f", cfg_y.k_p, cfg_y.k_i, cfg_y.k_d, cfg_y.k_ff);
+    }
+    if (update_yaw) {
+        pid_yaw_.configure(cfg_yaw);
+        RCLCPP_INFO(this->get_logger(), "Updated PID Yaw: P=%.2f I=%.2f D=%.2f FF=%.2f", cfg_yaw.k_p, cfg_yaw.k_i, cfg_yaw.k_d, cfg_yaw.k_ff);
+    }
+    
+    return result;
 }
 
 } // namespace ll_control

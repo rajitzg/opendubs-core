@@ -39,6 +39,9 @@ namespace ll_control {
         
         // Helper
         void setArduPilotMode(const std::string& mode);
+        
+        // Parameter Callback
+        rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
 
         // Subscribers & Publishers
         rclcpp::Subscription<mavros_msgs::msg::RCIn>::SharedPtr rc_sub_;
@@ -47,6 +50,7 @@ namespace ll_control {
         rclcpp::Publisher<mavros_msgs::msg::OverrideRCIn>::SharedPtr rc_override_pub_;
         rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_mode_client_;
         rclcpp::TimerBase::SharedPtr timer_;
+        rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr params_callback_handle_;
 
         // internal state
         ControlMode current_mode_{ControlMode::MANUAL};
