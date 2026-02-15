@@ -60,8 +60,8 @@ mavros_params_loader:
     SERVO4_FUNCTION: 35 # BR
 
     RCMAP_ROLL: 10 # lat
-    RCMAP_YAW: 9 # fwd
-    RCMAP_THROTTLE: 11 # turn
+    RCMAP_YAW: 11 # yaw
+    RCMAP_THROTTLE: 9 # fwd
 
     RC1_TRIM: 1500
     RC2_TRIM: 1500
@@ -75,3 +75,8 @@ mavros_params_loader:
     MODE4: 0
     MODE5: 0
     MODE6: 0
+
+    FS_ACTION: 0
+    FS_GCS_ENABLE: 1
+    FS_GCS_TIMEOUT: 0.5
+    FS_GCS_ACTION: 2

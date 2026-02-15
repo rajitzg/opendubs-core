@@ -116,9 +116,6 @@ LLControlNode::~LLControlNode() {
     // Switch to HOLD mode
     setArduPilotMode(mode_hold_name_);
 
-    // Switch to HOLD mode
-    setArduPilotMode(mode_hold_name_);
-
     auto msg = mavros_msgs::msg::OverrideRCIn();
     std::fill(msg.channels.begin(), msg.channels.end(), 65535);
     
