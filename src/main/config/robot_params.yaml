@@ -38,10 +38,10 @@ ll_control:
 
       pid_yaw_rate:
         max_output: 1.57 # rad/s (~90 deg/s)
-        k_p: 1.0         # 1.0 rad/s error -> 1.0 Normalized Effort (Full Power)
-        k_i: 0.1         # Integral accumulation
+        k_p: 0.15         # 1.0 rad/s error -> 1.0 Normalized Effort (Full Power)
+        k_i: 0.0         # Integral accumulation
         k_d: 0.0
-        k_ff: 0.0
+        k_ff: 0.7
       
       # Safety
       rc_timeout_threshold: 0.2
