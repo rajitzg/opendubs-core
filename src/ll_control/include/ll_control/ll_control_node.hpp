@@ -97,9 +97,9 @@ namespace ll_control {
 
         double rc_timeout_threshold_{0.2};
         double imu_timeout_threshold_{0.2};
-        double imu_fix_period_{2};
+        double imu_fix_period_{2.0};
         double imu_freq_threshold_{0.9};
-        double imu_target_freq_{50};
+        double imu_target_freq_{50.0};
 
         // Diagnostics
         diagnostic_updater::Updater updater_{this};

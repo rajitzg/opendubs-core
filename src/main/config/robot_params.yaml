@@ -46,7 +46,7 @@ ll_control:
       # Safety
       rc_timeout_threshold: 0.2
       imu_timeout_threshold: 0.2
-      imu_fix_period: 2
+      imu_fix_period: 2.0
       imu_freq_threshold: 0.9
       imu_target_freq: 50.0
 
