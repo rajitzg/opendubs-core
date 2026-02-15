@@ -55,6 +55,7 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     // Safety
     rc_timeout_threshold_ = this->declare_parameter("rc_timeout_threshold", rc_timeout_threshold_);
     imu_timeout_threshold_ = this->declare_parameter("imu_timeout_threshold", imu_timeout_threshold_);
+    imu_fix_period_ = this->declare_parameter("imu_fix_period", imu_fix_period_);
     imu_freq_threshold_ = this->declare_parameter("imu_freq_threshold", imu_freq_threshold_);
     imu_target_freq_ = this->declare_parameter("imu_target_freq", imu_target_freq_);
 
@@ -86,6 +87,7 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     // Initialize State
     last_rc_msg_time_ = this->now();
     last_imu_msg_time_ = this->now();
+    last_freq_fix_time_ = this->now();
     prev_control_loop_time_ = this->now().seconds();
 
     // Control loop timer (50Hz)
@@ -226,7 +228,7 @@ void LLControlNode::controlLoop() {
 
     if (current_mode_ != ControlMode::MANUAL) {
         if (imu_timeout) {
-             RCLCPP_ERROR(this->get_logger(), "CRITICAL: IMU Lost! Switching to HOLD.");
+            RCLCPP_ERROR(this->get_logger(), "CRITICAL: IMU Lost! Switching to HOLD.");
             setArduPilotMode(mode_hold_name_);
             
             // Output Neutral
@@ -234,11 +236,13 @@ void LLControlNode::controlLoop() {
             manual_control_pub_->publish(msg);
             return;
         } else if (imu_slow) {
-            RCLCPP_WARN(this->get_logger(), "IMU rate low: %.1f Hz. Attempting to fix rate.", current_imu_freq_);
-             std::thread([this]() { 
-                std::string cmd = "ros2 run mavros mav sys rate --all " + std::to_string(static_cast<int>(this->imu_target_freq_));
-                std::system(cmd.c_str()); 
-            }).detach();
+            if (now_sec - last_freq_fix_time_.seconds() > imu_fix_period_) {
+                RCLCPP_WARN(this->get_logger(), "IMU rate low: %.1f Hz. Attempting to fix rate.", current_imu_freq_);
+                std::thread([this]() { 
+                    std::string cmd = "ros2 run mavros mav sys rate --all " + std::to_string(static_cast<int>(this->imu_target_freq_));
+                    std::system(cmd.c_str()); 
+                }).detach();
+            }
         }
     }
 

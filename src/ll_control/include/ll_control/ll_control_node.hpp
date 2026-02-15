@@ -86,11 +86,13 @@ namespace ll_control {
         // Safety / Timeout
         rclcpp::Time last_rc_msg_time_;
         rclcpp::Time last_imu_msg_time_;
+        rclcpp::Time last_freq_fix_time_;
         double current_imu_freq_{0.0};
         bool odom_received_{false};
 
         double rc_timeout_threshold_{0.2};
         double imu_timeout_threshold_{0.2};
+        double imu_fix_period_{2};
         double imu_freq_threshold_{0.9};
         double imu_target_freq_{50};
 
