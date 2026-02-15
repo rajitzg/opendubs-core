@@ -79,4 +79,4 @@ mavros_params_loader:
     FS_ACTION: 2
     FS_GCS_ENABLE: 1
     FS_THR_ENABLE: 0
-    
+    FS_TIMEOUT: 0.5

@@ -3,6 +3,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 namespace ll_control {
 
@@ -25,6 +28,18 @@ class PidController {
 public:
     PidController() = default;
 
+    void init(rclcpp::Node* node, const std::string& name_prefix) {
+        if (!node) return;
+        
+        std::string topic_base = "ll_control/debug/" + name_prefix;
+        pub_target_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/target", 10);
+        pub_measured_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/measured", 10);
+        pub_measured_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/measured", 10);
+        pub_effort_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/effort", 10);
+        
+        initialized_ = true;
+    }
+
     void configure(const PidConfig& config) {
         config_ = config;
     }
@@ -42,11 +57,19 @@ public:
      * @return double Control effort (-1.0 to 1.0)
      */
     double calculate(double input_norm, double feedback, double dt) {
-        // 1. Apply Deadband to Input
+        // 1. Apply Deadband and Map to Target
         double cmd = applyDeadband(input_norm, config_.deadband);
-
-        // 2. Map to Target Physical Velocity
         double target = cmd * config_.max_output;
+        
+        // Publish Debug Info
+        if (initialized_) {
+            std_msgs::msg::Float64 msg;
+            msg.data = target;
+            pub_target_->publish(msg);
+            
+            msg.data = feedback;
+            pub_measured_->publish(msg);
+        }
 
         // 3. Compute Error
         double error = target - feedback;
@@ -71,7 +94,15 @@ public:
         output += (target * config_.k_ff);
 
         // 8. Clamp to Normalized Effort (-1.0 to 1.0)
-        return std::clamp(output, -1.0, 1.0);
+        double final_output = std::clamp(output, -1.0, 1.0);
+        
+        if (initialized_) {
+            std_msgs::msg::Float64 msg;
+            msg.data = final_output;
+            pub_effort_->publish(msg);
+        }
+        
+        return final_output;
     }
 
     // Accessors for debugging
@@ -81,6 +112,12 @@ public:
 private:
     PidConfig config_;
     PidState state_;
+    
+    // Debugging
+    bool initialized_{false};
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_target_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_measured_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_effort_;
 
     double applyDeadband(double input, double threshold) {
         if (std::abs(input) < threshold) {

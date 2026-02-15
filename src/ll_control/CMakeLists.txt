@@ -11,6 +11,8 @@ find_package(rclcpp REQUIRED)
 find_package(mavros_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 
 if(BUILD_TESTING)
@@ -28,7 +30,7 @@ endif()
 include_directories(include)
 
 add_executable(ll_control_node src/ll_control_node.cpp)
-ament_target_dependencies(ll_control_node rclcpp mavros_msgs nav_msgs sensor_msgs diagnostic_updater)
+ament_target_dependencies(ll_control_node rclcpp mavros_msgs nav_msgs sensor_msgs std_msgs diagnostic_updater)
 
 install(TARGETS
   ll_control_node

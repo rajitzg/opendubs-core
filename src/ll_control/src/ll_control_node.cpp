@@ -56,6 +56,11 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     cfg_yaw.k_ff = this->declare_parameter("pid_yaw_rate.k_ff", 0.0);
     cfg_yaw.deadband = input_deadband_;
     pid_yaw_.configure(cfg_yaw);
+        
+    // Initialize PID Debugging
+    pid_x_.init(this, "vel_x");
+    pid_y_.init(this, "vel_y");
+    pid_yaw_.init(this, "yaw_rate");
     
     // Safety
     rc_timeout_threshold_ = this->declare_parameter("rc_timeout_threshold", rc_timeout_threshold_);
