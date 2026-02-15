@@ -11,6 +11,11 @@ ll_control:
       input_ch_fwd: 1   # Pitch
       input_ch_lat: 0   # Roll
       input_ch_yaw: 3   # Yaw
+
+      # Output Mapping (Override Channels)
+      output_ch_fwd: 8
+      output_ch_lat: 9
+      output_ch_turn: 10
       
       # Tuning
       input_deadband: 0.05
@@ -49,10 +54,14 @@ mavros_params_loader:
   ros__parameters:
     # SERVO[output channel]_FUNCTION: 51 + [input channel]
     # corresponds to override channels
-    SERVO1_FUNCTION: 33 # FL
-    SERVO2_FUNCTION: 34 # FR
-    SERVO3_FUNCTION: 35 # BL
-    SERVO4_FUNCTION: 36 # BR
+    SERVO1_FUNCTION: 36 # FL
+    SERVO2_FUNCTION: 33 # FR
+    SERVO3_FUNCTION: 34 # BL
+    SERVO4_FUNCTION: 35 # BR
+
+    RCMAP_ROLL: 10 # lat
+    RCMAP_YAW: 9 # fwd
+    RCMAP_THROTTLE: 11 # turn
 
     RC1_TRIM: 1500
     RC2_TRIM: 1500

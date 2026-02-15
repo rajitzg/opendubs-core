@@ -4,7 +4,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/qos.hpp"
 #include "mavros_msgs/msg/rc_in.hpp"
-#include "mavros_msgs/msg/manual_control.hpp"
+#include "mavros_msgs/msg/override_rc_in.hpp"
 #include "mavros_msgs/msg/state.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/imu.hpp"
@@ -44,7 +44,7 @@ namespace ll_control {
         rclcpp::Subscription<mavros_msgs::msg::RCIn>::SharedPtr rc_sub_;
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_; // Placeholder for Pinpoint/Odom
         rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
-        rclcpp::Publisher<mavros_msgs::msg::ManualControl>::SharedPtr manual_control_pub_;
+        rclcpp::Publisher<mavros_msgs::msg::OverrideRCIn>::SharedPtr rc_override_pub_;
         rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_mode_client_;
         rclcpp::TimerBase::SharedPtr timer_;
 
@@ -78,6 +78,11 @@ namespace ll_control {
         int input_ch_fwd_{1};
         int input_ch_lat_{0};
         int input_ch_yaw_{3};
+
+        // Output mapping (Mecanum Mixer inputs: Fwd, Strafe, Turn)
+        int output_ch_fwd_{8};
+        int output_ch_lat_{9};
+        int output_ch_turn_{10};
 
         // Tuning
         double input_deadband_{0.05}; // 5% deadband (normalized 0-1)
