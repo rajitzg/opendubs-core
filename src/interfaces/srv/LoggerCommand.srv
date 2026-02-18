@@ -1,0 +1,7 @@
+uint8 START_RECORDING=0
+uint8 STOP_AND_DISCARD_RECORDING=1
+uint8 STOP_AND_SAVE_RECORDING=2
+
+uint8 command
+---
+bool success
