@@ -8,7 +8,7 @@ import os
 
 def generate_launch_description():
     pkg_share = FindPackageShare(package='descriptors').find('descriptors')
-    default_model_path = os.path.join(pkg_share, 'urdf', 'open_dubs_description.urdf')
+    default_model_path = os.path.join(pkg_share, 'sdf', 'open_dubs_description.sdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz', 'config.rviz')
 
     robot_state_publisher_node = Node(
