@@ -114,6 +114,8 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
         std::bind(&LLControlNode::parametersCallback, this, std::placeholders::_1));
         
     RCLCPP_INFO(this->get_logger(), "LL Control Node initialized.");
+
+    // Debug Mode Warning
     if (debug_mode) {
         RCLCPP_WARN(this->get_logger(), "Debug mode enabled: ArduPilot mode changes are disabled.");
     }
@@ -325,6 +327,7 @@ void LLControlNode::controlLoop() {
 
 
 void LLControlNode::setArduPilotMode(const std::string& mode) {
+    // In debug mode, we skip actually sending the SetMode request to avoid issues when MAVROS isn't running.
     if (debug_mode) {
         RCLCPP_INFO_SKIPFIRST_THROTTLE(
             this->get_logger(),

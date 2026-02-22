@@ -16,7 +16,7 @@ def generate_launch_description():
     
     launch_arguments = [
         DeclareLaunchArgument("config_file", default_value=default_config_path),
-        DeclareLaunchArgument("debug_mode", default_value="false")
+        DeclareLaunchArgument("debug_mode", default_value="false") # Debug mode will skip launching MAVROS and disable interactions with it in ll_control
     ]
     
     launches = [
