@@ -7,7 +7,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     default_model_path = PathJoinSubstitution([
-        FindPackageShare("descriptors"), "sdf", "open_dubs_descriptoin.sdf"
+        FindPackageShare("descriptors"), "sdf", "open_dubs_description.sdf"
     ])
     default_rviz_path = PathJoinSubstitution([
         FindPackageShare("descriptors"), "rviz", "config.rviz"

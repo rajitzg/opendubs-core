@@ -6,7 +6,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     default_model_path = PathJoinSubstitution([
-        FindPackageShare("descriptors"), "urdf", "open_dubs_descriptoin.urdf"
+        FindPackageShare("descriptors"), "urdf", "open_dubs_description.urdf"
     ])
 
     launch_arguments = [
