@@ -4,6 +4,7 @@ namespace ll_control {
 
 LLControlNode::LLControlNode() : Node("ll_control_node") {
     // Declare and get parameters
+    debug_mode = this->declare_parameter("debug_mode", debug_mode);
     
     // Mode Switching (RC Channel)
     input_ch_mode_ = this->declare_parameter("input_ch_mode", input_ch_mode_);
@@ -113,6 +114,9 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
         std::bind(&LLControlNode::parametersCallback, this, std::placeholders::_1));
         
     RCLCPP_INFO(this->get_logger(), "LL Control Node initialized.");
+    if (debug_mode) {
+        RCLCPP_WARN(this->get_logger(), "Debug mode enabled: ArduPilot mode changes are disabled.");
+    }
 }
 
 LLControlNode::~LLControlNode() {
@@ -321,6 +325,16 @@ void LLControlNode::controlLoop() {
 
 
 void LLControlNode::setArduPilotMode(const std::string& mode) {
+    if (debug_mode) {
+        RCLCPP_INFO_SKIPFIRST_THROTTLE(
+            this->get_logger(),
+            *this->get_clock(),
+            2000,
+            "Debug mode enabled: skipping SetMode request to '%s'",
+            mode.c_str());
+        return;
+    }
+
     if (!set_mode_client_->wait_for_service(std::chrono::milliseconds(100))) {
         RCLCPP_ERROR(this->get_logger(), "SetMode service not available");
         return;

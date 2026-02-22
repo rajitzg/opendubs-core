@@ -104,6 +104,7 @@ namespace ll_control {
         double imu_fix_period_{2.0};
         double imu_freq_threshold_{0.9};
         double imu_target_freq_{50.0};
+        bool debug_mode{false};
 
         // Diagnostics
         diagnostic_updater::Updater updater_{this};

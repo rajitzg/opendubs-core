@@ -2,6 +2,7 @@ import os
 from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
@@ -14,7 +15,8 @@ def generate_launch_description():
     ])
     
     launch_arguments = [
-        DeclareLaunchArgument("config_file", default_value=default_config_path)
+        DeclareLaunchArgument("config_file", default_value=default_config_path),
+        DeclareLaunchArgument("debug_mode", default_value="false")
     ]
     
     launches = [
@@ -24,7 +26,10 @@ def generate_launch_description():
                     FindPackageShare('ll_control'), 'launch', 'll_control_launch.py'
                 ])
             ]),
-            launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
+            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
+            launch_arguments={
+                'config_file': LaunchConfiguration("config_file")
+            }.items()
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -32,6 +37,7 @@ def generate_launch_description():
                     FindPackageShare('main'), 'launch', 'mavros_launch.py'
                 ])
             ]),
+            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
             launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
         ),
         IncludeLaunchDescription(
