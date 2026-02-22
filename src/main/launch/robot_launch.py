@@ -23,6 +23,17 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
+                    FindPackageShare('teleop_interface'), 'launch', 'teleop_interface_launch.py'
+                ])
+            ]),
+            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
+            launch_arguments={
+                'config_file': LaunchConfiguration("config_file")
+            }.items()
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
                     FindPackageShare('ll_control'), 'launch', 'll_control_launch.py'
                 ])
             ]),

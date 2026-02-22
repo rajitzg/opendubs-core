@@ -1,26 +1,13 @@
 ll_control:
   ll_control_node:
     ros__parameters:
-      # Mode Switching (RC Channel PWM)
-      input_ch_mode: 4          # Channel 5 (0-indexed 4)
-      mode_pwm_manual_threshold: 1300
-      mode_pwm_auto_threshold: 1700
       mode_hold_name: "HOLD"
-
-      # Input Channels (RC Receiver)
-      input_ch_fwd: 1   # Pitch
-      input_ch_lat: 0   # Roll
-      input_ch_yaw: 3   # Yaw
 
       # Output Mapping (Override Channels)
       output_ch_fwd: 8
       output_ch_lat: 9
       output_ch_turn: 10
-      
-      # Tuning
-      input_deadband: 0.05
-      input_threshold_throttle: 900
-      
+
       # Velocity Limits & PID
       pid_vel_x:
         max_output: 1.0 # m/s (Max Physical Velocity)
@@ -28,7 +15,7 @@ ll_control:
         k_i: 0.0
         k_d: 0.0
         k_ff: 1.0       # 1.0 m/s -> 1.0 Normalized Output (Full Power)
-      
+
       pid_vel_y:
         max_output: 1.0 # m/s
         k_p: 0.0
@@ -38,17 +25,46 @@ ll_control:
 
       pid_yaw_rate:
         max_output: 1.57 # rad/s (~90 deg/s)
-        k_p: 0.15         # 1.0 rad/s error -> 1.0 Normalized Effort (Full Power)
-        k_i: 0.0         # Integral accumulation
+        k_p: 0.15         # 1.0 rad/s error -> 1.0 Normalized Effort
+        k_i: 0.0
         k_d: 0.0
         k_ff: 0.7
-      
+
       # Safety
-      rc_timeout_threshold: 0.2
+      cmd_vel_timeout_threshold: 0.5 # seconds
       imu_timeout_threshold: 0.2
       imu_fix_period: 2.0
       imu_freq_threshold: 0.9
       imu_target_freq: 50.0
+
+teleop_interface:
+  teleop_interface_node:
+    ros__parameters:
+      # Mode Switching (RC Channel PWM)
+      input_ch_mode: 4          # Channel 5 (0-indexed)
+      mode_pwm_manual_threshold: 1300
+      mode_pwm_auto_threshold: 1700
+
+      # Input Channels (RC Receiver, 0-indexed)
+      input_ch_fwd: 1   # Pitch
+      input_ch_lat: 0   # Roll
+      input_ch_yaw: 3   # Yaw
+
+      # Deadband (normalized 0..1)
+      input_deadband: 0.05
+
+      # Velocity limits in VELOCITY mode (full stick = these values)
+      vel_max_linear: 1.0   # m/s
+      vel_max_angular: 1.57 # rad/s (~90 deg/s)
+
+      # Controller watchdog: throttle channel holds this PWM value when transmitter is off
+      throttle_ch: 2
+      throttle_idle_value: 900
+
+      # Logger: channel that triggers bag recording (rising-edge toggle)
+      logger_ch: 5
+      logger_pwm_threshold: 1700
+      logger_service_name: "record_data"
 
 data_logging:
   bag_recorder:
@@ -67,9 +83,9 @@ mavros_params_loader:
     SERVO3_FUNCTION: 34 # BL
     SERVO4_FUNCTION: 35 # BR
 
-    RCMAP_ROLL: 10 # lat
-    RCMAP_YAW: 11 # yaw
-    RCMAP_THROTTLE: 9 # fwd
+    RCMAP_ROLL: 10 # lat (output channel 9)
+    RCMAP_YAW: 11 # yaw (output channel 10)
+    RCMAP_THROTTLE: 9 # fwd (output channel 8)
 
     RC1_TRIM: 1500
     RC2_TRIM: 1500
