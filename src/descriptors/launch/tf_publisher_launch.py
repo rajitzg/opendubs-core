@@ -22,6 +22,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-       model_file,
+        model_file,
         robot_state_publisher_node,
     ])

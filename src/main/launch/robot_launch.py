@@ -47,6 +47,13 @@ def generate_launch_description():
                 ])
             ]),
         ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('descriptors'), 'launch', 'tf_publisher_launch.py'
+                ])
+            ]),
+        )
     ]
     
     return LaunchDescription(launch_arguments + launches)
