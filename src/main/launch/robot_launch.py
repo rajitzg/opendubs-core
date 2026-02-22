@@ -53,6 +53,14 @@ def generate_launch_description():
                     FindPackageShare('descriptors'), 'launch', 'tf_publisher_launch.py'
                 ])
             ]),
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('data_logging'), 'launch', 'bag_recorder_launch.py'
+                ])
+            ]),
+            launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
         )
     ]
     

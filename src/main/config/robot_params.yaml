@@ -50,6 +50,14 @@ ll_control:
       imu_freq_threshold: 0.9
       imu_target_freq: 50.0
 
+data_logging:
+  bag_recorder:
+    ros__parameters:
+      bag_path: src/data_logging/rosbags
+      log_topics: ["/mocap/localization/pose", "/mocap/localization/odom"]
+      service_topic: record_data
+      max_record_duration: 300
+
 mavros_params_loader:
   ros__parameters:
     # SERVO[output channel]_FUNCTION: 51 + [input channel]

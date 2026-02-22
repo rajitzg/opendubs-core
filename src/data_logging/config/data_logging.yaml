@@ -1,6 +1,0 @@
-bag_recorder:
-  ros__parameters:
-    bag_path: src/data_logging/rosbags
-    log_topics: ["/mocap/localization/pose", "/mocap/localization/odom"]
-    service_topic: record_data
-    max_record_duration: 300

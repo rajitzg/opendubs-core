@@ -14,11 +14,8 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', [
             'launch/bag_recorder_launch.py',
-        ]),
-        ('share/' + package_name + '/config', [
-            'config/data_logging.yaml'
-        ]),
-    ],
+        ])
+    ],  
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='fadag',
