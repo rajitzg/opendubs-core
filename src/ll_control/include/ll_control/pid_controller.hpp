@@ -14,9 +14,9 @@ struct PidConfig {
     double k_i = 0.0;
     double k_d = 0.0;
     double k_ff = 0.0;
-    double max_output = 1.0;     // Max physical velocity (m/s or rad/s)
-    double integrity_limit = 1.0; // Anti-windup limit
-    double deadband = 0.05;       // Normalized input deadband
+    double max_output = 1.0;      // Physical velocity scale (m/s or rad/s).
+                                  // Used to normalize FF: (target/max_output)*k_ff.
+    double integrity_limit = 1.0; // Anti-windup clamp on the integral state.
 };
 
 struct PidState {
@@ -30,13 +30,12 @@ public:
 
     void init(rclcpp::Node* node, const std::string& name_prefix) {
         if (!node) return;
-        
+
         std::string topic_base = "ll_control/debug/" + name_prefix;
-        pub_target_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/target", 10);
+        pub_target_   = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/target",   10);
         pub_measured_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/measured", 10);
-        pub_measured_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/measured", 10);
-        pub_effort_ = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/effort", 10);
-        
+        pub_effort_   = node->create_publisher<std_msgs::msg::Float64>(topic_base + "/effort",   10);
+
         initialized_ = true;
     }
 
@@ -49,87 +48,73 @@ public:
     }
 
     /**
-     * @brief Calculate control output (Normalized -1.0 to 1.0)
-     * 
-     * @param input_norm Normalized command input (-1.0 to 1.0)
-     * @param feedback Current system state (e.g. gyro rate or velocity)
-     * @param dt Time delta in seconds
-     * @return double Control effort (-1.0 to 1.0)
+     * @brief Calculate normalized control effort (-1..1).
+     *
+     * @param target    Desired value in physical units (m/s or rad/s).
+     * @param feedback  Current measured value in the same physical units.
+     * @param dt        Time delta in seconds.
+     * @return double   Normalized control effort clamped to [-1, 1].
+     *
+     * Deadband is NOT applied here — it is the caller's responsibility to zero
+     * small targets before calling (e.g. teleop_interface applies stick deadband).
      */
-    double calculate(double input_norm, double feedback, double dt) {
-        // 1. Apply Deadband and Map to Target
-        double cmd = applyDeadband(input_norm, config_.deadband);
-        double target = cmd * config_.max_output;
-        
-        // Publish Debug Info
-        if (initialized_) {
-            std_msgs::msg::Float64 msg;
-            msg.data = target;
-            pub_target_->publish(msg);
-            
-            msg.data = feedback;
-            pub_measured_->publish(msg);
-        }
+    double calculate(double target, double feedback, double dt) {
+        // 1. Hard-cap the target to the allowed velocity range.
+        //    This is the strict motor velocity limit: even if the caller requests more,
+        //    the controller will never try to exceed max_output.
+        double capped_target = std::clamp(target, -config_.max_output, config_.max_output);
 
-        // 3. Compute Error
-        double error = target - feedback;
+        // 2. Error in physical units against the capped target
+        double error = capped_target - feedback;
 
-        // 4. Update Integral
+        // 3. Integral with anti-windup
         state_.integral += error * dt;
-        state_.integral = std::clamp(state_.integral, -config_.integrity_limit, config_.integrity_limit);
+        state_.integral = std::clamp(state_.integral,
+                                     -config_.integrity_limit,
+                                      config_.integrity_limit);
 
-        // 5. Derivative
+        // 4. Derivative
         double derivative = 0.0;
         if (dt > 0.000001) {
             derivative = (error - state_.prev_error) / dt;
         }
         state_.prev_error = error;
 
-        // 6. Output (PID)
-        double output = (config_.k_p * error) + 
-                        (config_.k_i * state_.integral) + 
+        // 5. PID output (gains map physical error → normalized effort)
+        double output = (config_.k_p * error) +
+                        (config_.k_i * state_.integral) +
                         (config_.k_d * derivative);
 
-        // 7. Feedforward
-        output += (target * config_.k_ff);
+        // 6. Feedforward: normalize capped_target by max_output so k_ff=1 gives
+        //    full effort at the velocity cap, regardless of max_output scale.
+        output += (capped_target / config_.max_output) * config_.k_ff;
 
-        // 8. Clamp to Normalized Effort (-1.0 to 1.0)
+        // 7. Clamp to normalized effort range [-1, 1]
         double final_output = std::clamp(output, -1.0, 1.0);
-        
+
+        // 8. Debug topics
         if (initialized_) {
             std_msgs::msg::Float64 msg;
-            msg.data = final_output;
-            pub_effort_->publish(msg);
+            msg.data = capped_target; pub_target_->publish(msg);
+            msg.data = feedback;      pub_measured_->publish(msg);
+            msg.data = final_output;  pub_effort_->publish(msg);
         }
-        
+
         return final_output;
     }
 
-    // Accessors for debugging
-    const PidState& getState() const { return state_; }
+    const PidState&  getState()  const { return state_; }
     const PidConfig& getConfig() const { return config_; }
 
 private:
     PidConfig config_;
     PidState state_;
-    
+
     // Debugging
     bool initialized_{false};
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_target_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_measured_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_effort_;
-
-    double applyDeadband(double input, double threshold) {
-        if (std::abs(input) < threshold) {
-            return 0.0;
-        }
-        // Rescale so it starts at 0 right after deadband
-        if (input > 0) {
-            return (input - threshold) / (1.0 - threshold);
-        } else {
-            return (input + threshold) / (1.0 - threshold);
-        }
-    }
 };
 
 } // namespace ll_control
