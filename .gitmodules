@@ -1,7 +1,7 @@
 [submodule "src/open_dubs_mocap"]
 	path = src/open_dubs_mocap
 	url = https://github.com/EricJGoossen/open_dubs_mocap.git
-[submodule "src/deps/rplidar_ros"]
-	path = src/deps/rplidar_ros
+[submodule "src/rplidar_ros"]
+	path = src/rplidar_ros
 	url = https://github.com/Slamtec/rplidar_ros.git
 	branch = ros2
