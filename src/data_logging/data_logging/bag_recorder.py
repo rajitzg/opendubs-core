@@ -2,6 +2,8 @@ from interfaces.srv import LoggerCommand
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
+from rcl_interfaces.msg import SetParametersResult
 from datetime import datetime
 import os
 import yaml 
@@ -27,12 +29,12 @@ class BagRecorder(Node):
             .get_parameter_value().integer_value
         log_topics = self.get_parameter("log_topics")\
             .get_parameter_value().string_array_value
-        
+
         # Remove any empty strings
         self.valid_topics = [t for t in log_topics if t]
         if not self.valid_topics:
-            self.get_logger().warning("No valid topics specified for recording. Recording will not start.")
-            return
+            self.get_logger().warning("No valid topics specified for recording.")
+
         # Ensure bag path exists
         os.makedirs(self.bag_path, exist_ok=True)
 
@@ -43,7 +45,22 @@ class BagRecorder(Node):
         # Service
         self.create_service(LoggerCommand, self.service_topic, self.service_callback)
 
+        # Watch for runtime parameter changes
+        self.add_on_set_parameters_callback(self._on_set_parameters)
+
         self.get_logger().info("Bag recorder ready.")
+
+    # Parameter change callback
+    def _on_set_parameters(self, params):
+        for param in params:
+            if param.name == "log_topics" and param.type_ == Parameter.Type.STRING_ARRAY:
+                new_topics = [t for t in param.value if t]
+                self.valid_topics = new_topics
+                if new_topics:
+                    self.get_logger().info(f"Updated log_topics: {new_topics}")
+                else:
+                    self.get_logger().warning("log_topics updated but no valid topics specified.")
+        return SetParametersResult(successful=True)
 
     # Service callbacks
     def service_callback(self, request, response):
