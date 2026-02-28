@@ -104,3 +104,17 @@ mavros_params_loader:
     FS_GCS_ENABLE: 1
     FS_THR_ENABLE: 0
     FS_TIMEOUT: 0.5
+
+    local_position:
+      tf:
+        send: true
+        frame_id: "odom"
+        child_frame_id: "base_link"
+
+mavros:
+  ros__parameters:
+    local_position:
+      tf:
+        send: true
+        frame_id: "odom"
+        child_frame_id: "base_link"

@@ -41,7 +41,6 @@ def load_mavros_params(context, *args, **kwargs):
         return []
 
 def generate_launch_description():
-    
     config_launch_arg = DeclareLaunchArgument("config_file")
     fcu_launch_arg = DeclareLaunchArgument("fcu_url", default_value="/dev/serial/by-id/usb-ArduPilot_fmuv2_1C0027000D51373337333031-if00:57600")
     gcs_launch_arg = DeclareLaunchArgument("gcs_url", default_value="")
@@ -57,6 +56,7 @@ def generate_launch_description():
         launch_arguments={
             "fcu_url": LaunchConfiguration("fcu_url"),
             "gcs_url": LaunchConfiguration("gcs_url"),
+            "params_file": LaunchConfiguration("config_file"),
             }.items()
     )
     
