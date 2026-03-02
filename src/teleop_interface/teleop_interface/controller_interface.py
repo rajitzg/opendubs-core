@@ -15,9 +15,9 @@ class ControlMode(IntEnum):
     AUTO = 2
 
 
-class TeleopInterfaceNode(Node):
+class ControllerInterfaceNode(Node):
     def __init__(self):
-        super().__init__('teleop_interface_node')
+        super().__init__('controller_interface_node')
 
         # --- Parameters ---
         # Stick input channels (0-indexed)
@@ -42,16 +42,10 @@ class TeleopInterfaceNode(Node):
         self.declare_parameter('vel_max_linear', 1.0)   # m/s
         self.declare_parameter('vel_max_angular', 1.57)  # rad/s (~90 deg/s)
 
-        # Logger: which channel triggers recording + the PWM threshold + service name
-        self.declare_parameter('logger_ch', 5)
-        self.declare_parameter('logger_pwm_threshold', 1700)
-        self.declare_parameter('logger_service_name', 'record_data')
-
         self._load_params()
 
         # --- State ---
         self._current_mode = ControlMode.MANUAL
-        self._logger_active = False   # tracks whether recording has been started
         self._controller_connected = True  # assume connected until proven otherwise
         self._last_rc_time = self.get_clock().now()
 
@@ -76,14 +70,10 @@ class TeleopInterfaceNode(Node):
         )
         self._mode_pub = self.create_publisher(Int8, '/teleop/control_mode', mode_pub_qos)
 
-        # --- Logger Service Client ---
-        self._logger_client = self.create_client(
-            LoggerCommand, self._logger_service_name)
-
         # Publish initial mode
         self._publish_mode(self._current_mode)
 
-        self.get_logger().info('TeleopInterface node initialized.')
+        self.get_logger().info('ControllerInterface node initialized.')
 
     # -----------------------------------------------------------------------
     # Parameter loading
@@ -100,9 +90,6 @@ class TeleopInterfaceNode(Node):
         self._throttle_idle = self.get_parameter('throttle_idle_value').value
         self._vel_max_linear = self.get_parameter('vel_max_linear').value
         self._vel_max_angular = self.get_parameter('vel_max_angular').value
-        self._logger_ch = self.get_parameter('logger_ch').value
-        self._logger_pwm_threshold = self.get_parameter('logger_pwm_threshold').value
-        self._logger_service_name = self.get_parameter('logger_service_name').value
 
     # -----------------------------------------------------------------------
     # RC Callback
@@ -169,16 +156,6 @@ class TeleopInterfaceNode(Node):
 
         self._cmd_vel_pub.publish(twist)
 
-        # --- Logger Channel ---
-        if n > self._logger_ch:
-            logger_active = ch[self._logger_ch] > self._logger_pwm_threshold
-            if logger_active != self._logger_active:
-                self._logger_active = logger_active
-                if logger_active:
-                    self._send_logger_command(LoggerCommand.Request.START_RECORDING)
-                else:
-                    self._send_logger_command(LoggerCommand.Request.STOP_AND_SAVE_RECORDING)
-
     # -----------------------------------------------------------------------
     # Helpers
     # -----------------------------------------------------------------------
@@ -195,32 +172,9 @@ class TeleopInterfaceNode(Node):
         msg.data = int(mode)
         self._mode_pub.publish(msg)
 
-    def _send_logger_command(self, command: int):
-        """Asynchronously call the LoggerCommand service."""
-        if not self._logger_client.service_is_ready():
-            self.get_logger().warning(
-                f'Logger service "{self._logger_service_name}" not available; '
-                'skipping command.')
-            return
-
-        request = LoggerCommand.Request()
-        request.command = command
-        future = self._logger_client.call_async(request)
-
-        def _done(f):
-            result = f.result()
-            if result is None or not result.success:
-                self.get_logger().warning(
-                    f'Logger command {command} failed or returned False.')
-            else:
-                self.get_logger().info(f'Logger command {command} succeeded.')
-
-        future.add_done_callback(_done)
-
-
 def main(args=None):
     rclpy.init(args=args)
-    node = TeleopInterfaceNode()
+    node = ControllerInterfaceNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

@@ -17,5 +17,13 @@ def generate_launch_description():
             name='teleop_interface_node',
             output='screen',
             parameters=[LaunchConfiguration('config_file')],
+        ),
+        Node(
+            package='teleop_interface',
+            executable='api_node',
+            namespace='teleop_interface',
+            name='api_node',
+            output='screen',
+            parameters=[LaunchConfiguration('config_file')],
         )
     ])

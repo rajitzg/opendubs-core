@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'teleop_interface_node = teleop_interface.teleop_interface:main',
+            'api_node = teleop_interface.api_node:main',
         ],
     },
 )
