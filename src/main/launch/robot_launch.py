@@ -54,6 +54,14 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
+                    FindPackageShare('main'), 'launch', 'localization_launch.py'
+                ])
+            ]),
+            launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
                     FindPackageShare('diagnostics'), 'launch', 'diagnostics_launch.py'
                 ])
             ]),
