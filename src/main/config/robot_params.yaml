@@ -104,3 +104,4 @@ mavros_params_loader:
     FS_GCS_ENABLE: 1
     FS_THR_ENABLE: 0
     FS_TIMEOUT: 0.5
+    FS_GCS_TIMEOUT: 2.0 # for newer versions of ardupilot
