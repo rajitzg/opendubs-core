@@ -70,8 +70,12 @@ class BagRecorder(Node):
     # Service callbacks
     def service_callback(self, request, response):
         if request.command == LoggerCommand.Request.START_RECORDING and not self.recording:
-            self.start_recording()
-            response.success = True
+            if len(self.valid_topics) == 0:
+                self.get_logger().warning("No valid topics specified for recording.")
+                response.success = False
+            else:
+                self.start_recording()
+                response.success = True
         elif request.command == LoggerCommand.Request.STOP_AND_DISCARD_RECORDING and self.recording:
             self.stop_and_discard_recording()
             response.success = True
@@ -103,14 +107,17 @@ class BagRecorder(Node):
         self.stop_recording()
         self.get_logger().info("Saving rosbag recording.")
 
-        # Rename temp bag directory
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        new_name = f"bag_{timestamp}"
+        if os.path.exists(os.path.join(self.bag_path, "temp")):
+            # Rename temp bag directory
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            new_name = f"bag_{timestamp}"
 
-        os.rename(
-            os.path.join(self.bag_path, "temp"),
-            os.path.join(self.bag_path, new_name)
-        )
+            os.rename(
+                os.path.join(self.bag_path, "temp"),
+                os.path.join(self.bag_path, new_name)
+            )
+        else:
+            self.get_logger().warning("Recording did not save properly.")
 
     def stop_and_discard_recording(self):
         self.stop_recording()
