@@ -1,6 +1,7 @@
 /**:
   ros__parameters:
     logger_service_name: "/record_data"
+    is_recording_topic: "/is_recording"
 
 ll_control:
   ll_control_node:
