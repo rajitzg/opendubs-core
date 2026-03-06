@@ -17,17 +17,14 @@ class BagRecorder(Node):
         super().__init__("bag_recorder")
 
         # Grab parameters
-        self.declare_parameter("bag_path", "src/data_logging/rosbags")
+        self.declare_parameter("bag_path", "opendubs-core/src/data_logging/rosbags")
         self.declare_parameter("logger_service_name", "record_data")
         self.declare_parameter("max_record_duration", 300) # seconds
         self.declare_parameter("is_recording_topic", "is_recording")
         self.declare_parameter("log_topics", [""])
 
-        self.bag_path = os.path.abspath(
-            os.path.expanduser(
-                self.get_parameter("bag_path").get_parameter_value().string_value
-            )
-        )
+        self.bag_path = self.get_parameter("bag_path")\
+            .get_parameter_value().string_value
         self.logger_service_name = self.get_parameter("logger_service_name")\
             .get_parameter_value().string_value
         self.max_record_duration = self.get_parameter("max_record_duration")\
