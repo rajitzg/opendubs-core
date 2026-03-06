@@ -7,7 +7,7 @@ from rcl_interfaces.msg import SetParametersResult
 from datetime import datetime
 from std_msgs.msg import Bool
 import os
-import yaml 
+
 import subprocess
 import signal
 import shutil
