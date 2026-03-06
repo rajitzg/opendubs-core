@@ -14,7 +14,7 @@ app = FastAPI(title="Robot Teleop API", description="REST API for Robot Controls
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -82,7 +82,7 @@ class APINode(Node):
         event.wait(timeout=2.0)
         
         if result_box and result_box[0] is not None:
-             return result_box[0].success
+            return result_box[0].success
         return False
 
     def is_recording_callback(self, msg: Bool):
