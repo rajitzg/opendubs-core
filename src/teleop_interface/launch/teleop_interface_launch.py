@@ -12,9 +12,9 @@ def generate_launch_description():
         config_launch_arg,
         Node(
             package='teleop_interface',
-            executable='teleop_interface_node',
+            executable='controller_interface_node',
             namespace='teleop_interface',
-            name='teleop_interface_node',
+            name='controller_interface_node',
             output='screen',
             parameters=[LaunchConfiguration('config_file')],
         ),
