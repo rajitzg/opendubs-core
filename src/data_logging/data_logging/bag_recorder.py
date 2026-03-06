@@ -92,7 +92,8 @@ class BagRecorder(Node):
             f"ros2", f"bag", f"record",
             f"--max-bag-duration", f"{self.max_record_duration}",
             f"-o", f"{self.bag_path}/temp",
-        ] + self.valid_topics
+            f"--topics ", *self.valid_topics
+        ]
 
         self.rosbag_proc = subprocess.Popen(command)
         self.recording = True
