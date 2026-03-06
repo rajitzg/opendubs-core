@@ -6,7 +6,6 @@ from enum import IntEnum
 from mavros_msgs.msg import RCIn
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Int8
-from interfaces.srv import LoggerCommand
 
 
 class ControlMode(IntEnum):
