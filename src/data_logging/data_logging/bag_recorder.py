@@ -17,13 +17,13 @@ class BagRecorder(Node):
 
         # Grab parameters
         self.declare_parameter("bag_path", "src/data_logging/rosbags")
-        self.declare_parameter("service_topic", "logger_command")
+        self.declare_parameter("logger_service_name", "record_data")
         self.declare_parameter("max_record_duration", 300) # seconds
         self.declare_parameter("log_topics", [""])
 
         self.bag_path = self.get_parameter("bag_path")\
             .get_parameter_value().string_value
-        self.service_topic = self.get_parameter("service_topic")\
+        self.logger_service_name = self.get_parameter("logger_service_name")\
             .get_parameter_value().string_value
         self.max_record_duration = self.get_parameter("max_record_duration")\
             .get_parameter_value().integer_value
@@ -43,7 +43,7 @@ class BagRecorder(Node):
         self.rosbag_proc = None
 
         # Service
-        self.create_service(LoggerCommand, self.service_topic, self.service_callback)
+        self.create_service(LoggerCommand, self.logger_service_name, self.service_callback)
 
         # Watch for runtime parameter changes
         self.add_on_set_parameters_callback(self._on_set_parameters)
