@@ -1,3 +1,8 @@
+/**:
+  ros__parameters:
+    logger_service_name: "/record_data"
+    is_recording_topic: "/is_recording"
+
 ll_control:
   ll_control_node:
     ros__parameters:
@@ -64,14 +69,12 @@ teleop_interface:
       # Logger: channel that triggers bag recording (rising-edge toggle)
       logger_ch: 5
       logger_pwm_threshold: 1700
-      logger_service_name: "record_data"
 
 data_logging:
   bag_recorder:
     ros__parameters:
-      bag_path: src/data_logging/rosbags
+      bag_path: opendubs-core/src/data_logging/rosbags
       log_topics: ["/mocap/localization/pose", "/mocap/localization/odom"]
-      service_topic: record_data
       max_record_duration: 300
 
 mavros_params_loader:
