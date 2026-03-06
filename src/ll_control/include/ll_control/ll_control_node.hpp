@@ -79,6 +79,7 @@ namespace ll_control {
         rclcpp::Time last_freq_fix_time_;
         double current_imu_freq_{0.0};
         bool odom_received_{false};
+        double last_set_mode_time_sec_{0.0};
 
         double cmd_vel_timeout_threshold_{0.5}; 
         double imu_timeout_threshold_{0.2};
