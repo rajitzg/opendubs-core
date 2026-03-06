@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import threading
+from std_msgs.msg import Bool
 
 from interfaces.srv import LoggerCommand
 from teleop_interface.api_router import router as logger_router
@@ -33,14 +34,20 @@ class APINode(Node):
         self.declare_parameter('host', '0.0.0.0')
         self.declare_parameter('port', 8000)
         self.declare_parameter('logger_service_name', 'record_data')
+        self.declare_parameter("is_recording_topic", "is_recording")
 
         self.host = self.get_parameter('host').value
         self.port = self.get_parameter('port').value
         self.logger_service_name = self.get_parameter('logger_service_name').value
+        self.is_recording_topic = self.get_parameter("is_recording_topic").value
 
         # --- Logger Service Client ---
         self._logger_client = self.create_client(
             LoggerCommand, self.logger_service_name)
+        self.is_recording_sub = self.create_subscription(
+            Bool, self.is_recording_topic, self.is_recording_callback, 10)
+
+        self.is_recording = False
 
         self.get_logger().info('API Node initialized.')
 
@@ -77,6 +84,9 @@ class APINode(Node):
         if result_box and result_box[0] is not None:
              return result_box[0].success
         return False
+
+    def is_recording_callback(self, msg: Bool):
+        self.is_recording = msg.data
 
 
 def ros2_thread_func(node):
