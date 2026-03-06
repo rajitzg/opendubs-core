@@ -23,8 +23,11 @@ class BagRecorder(Node):
         self.declare_parameter("is_recording_topic", "is_recording")
         self.declare_parameter("log_topics", [""])
 
-        self.bag_path = self.get_parameter("bag_path")\
-            .get_parameter_value().string_value
+        self.bag_path = os.path.abspath(
+            os.path.expanduser(
+                self.get_parameter("bag_path").get_parameter_value().string_value
+            )
+        )
         self.logger_service_name = self.get_parameter("logger_service_name")\
             .get_parameter_value().string_value
         self.max_record_duration = self.get_parameter("max_record_duration")\

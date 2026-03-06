@@ -73,7 +73,7 @@ teleop_interface:
 data_logging:
   bag_recorder:
     ros__parameters:
-      bag_path: src/data_logging/rosbags
+      bag_path: ~/opendubs-core/src/data_logging/rosbags
       log_topics: ["/mocap/localization/pose", "/mocap/localization/odom"]
       max_record_duration: 300
 
