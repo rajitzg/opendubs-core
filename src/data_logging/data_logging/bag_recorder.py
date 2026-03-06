@@ -112,10 +112,13 @@ class BagRecorder(Node):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             new_name = f"bag_{timestamp}"
 
+            new_path = os.path.join(self.bag_path, new_name)
+
             os.rename(
                 os.path.join(self.bag_path, "temp"),
-                os.path.join(self.bag_path, new_name)
+                new_path
             )
+            self.get_logger().info(f"Recording saved at {new_path}")
         else:
             self.get_logger().warning("Recording did not save properly.")
 
