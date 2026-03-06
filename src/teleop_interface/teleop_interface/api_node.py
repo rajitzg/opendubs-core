@@ -111,7 +111,7 @@ def main(args=None):
         
         # NOTE: uvicorn.run when passed 'app' directly cannot take reload=True in all environments easily
         # For a ROS node, we usually just run the app directly
-        uvicorn.run(app, host=ros_node.host, port=ros_node.port, log_level="info")
+        uvicorn.run(app, host=ros_node.host, port=ros_node.port, log_level="warning")
     except KeyboardInterrupt:
         pass
     finally:
