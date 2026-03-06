@@ -7,6 +7,9 @@ class LoggerResponse(BaseModel):
     success: bool
     message: str
 
+class StatusResponse(BaseModel):
+    is_recording: bool
+
 # Create a FastAPI router
 router = APIRouter()
 
@@ -48,3 +51,10 @@ def stop_discard_logger(request: Request):
         return LoggerResponse(success=True, message="Logger stopped and discarded.")
     else:
         raise HTTPException(status_code=503, detail="Failed to stop logger. Is the service running?")
+
+@router.get("/logger/status", response_model=StatusResponse)
+def get_logger_status(request: Request):
+    ros_node = request.app.state.ros_node
+    if ros_node is None:
+        raise HTTPException(status_code=500, detail="ROS node not initialized")
+    return StatusResponse(is_recording=ros_node.is_recording)
