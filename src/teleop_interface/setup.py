@@ -15,7 +15,7 @@ setup(
         (os.path.join('share', package_name, 'launch'),
             glob('launch/*.py')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'fastapi', 'uvicorn'],
     zip_safe=True,
     maintainer='rgnp',
     maintainer_email='rzghosh@gmail.com',
