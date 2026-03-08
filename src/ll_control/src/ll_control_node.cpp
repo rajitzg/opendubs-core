@@ -282,6 +282,12 @@ void LLControlNode::controlLoop() {
 }
 
 void LLControlNode::setArduPilotMode(const std::string& mode) {
+    double now_sec = this->now().seconds();
+    if (now_sec - last_set_mode_time_sec_ < 1.0) {
+        return;
+    }
+    last_set_mode_time_sec_ = now_sec;
+
     // In debug mode, we skip actually sending the SetMode request to avoid issues when MAVROS isn't running.
     if (debug_mode) {
         RCLCPP_INFO_SKIPFIRST_THROTTLE(

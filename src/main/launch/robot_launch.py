@@ -54,6 +54,13 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
+                    FindPackageShare('main'), 'launch', 'sensor_launch.py'
+                ])
+            ]),
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
                     FindPackageShare('diagnostics'), 'launch', 'diagnostics_launch.py'
                 ])
             ]),
