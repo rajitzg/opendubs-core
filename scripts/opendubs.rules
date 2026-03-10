@@ -6,7 +6,8 @@
 
 # --- SLLIDAR A1 (Silicon Labs CP2102 USB-UART) ---
 # Vendor: Silicon Labs (10c4), Product: CP210x (ea60)
-KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="rplidar"
+KERNEL=="ttyUSB0", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="rplidar0"
+KERNEL=="ttyUSB1", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="rplidar1"
 
 # --- Pixhawk 2.4.8 / ArduPilot FCU (native USB, pid.codes VID) ---
 # Vendor: pid.codes (1209) — used by Pixhawk 2.4.8 clones
