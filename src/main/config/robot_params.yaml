@@ -105,16 +105,9 @@ mavros_params_loader:
     FS_THR_ENABLE: 0
     FS_TIMEOUT: 0.5
 
-    local_position:
-      tf:
-        send: true
-        frame_id: "odom"
-        child_frame_id: "base_link"
-
-mavros:
-  ros__parameters:
-    local_position:
-      tf:
-        send: true
-        frame_id: "odom"
-        child_frame_id: "base_link"
+descriptors:
+  odom_tf_broadcaster:
+    ros__parameters:
+      odom_frame_id: "odom"
+      base_frame_id: "base_link"
+      input_odom_topic: "/mavros/local_position/odom"

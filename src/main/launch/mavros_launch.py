@@ -43,7 +43,7 @@ def load_mavros_params(context, *args, **kwargs):
 def generate_launch_description():
     config_launch_arg = DeclareLaunchArgument("config_file")
     fcu_launch_arg = DeclareLaunchArgument("fcu_url", default_value="serial:///dev/serial/by-id/usb-ArduPilot_Pixhawk1_1C0027000D51373337333031-if00:57600")
-    gcs_launch_arg = DeclareLaunchArgument("gcs_url", default_value="")
+    gcs_launch_arg = DeclareLaunchArgument("gcs_url", default_value="udp://@10.18.153.129")
     
     launch_args = [config_launch_arg, fcu_launch_arg, gcs_launch_arg]
     
