@@ -14,25 +14,26 @@ def load_mavros_params(context, *args, **kwargs):
             config = yaml.safe_load(f)
           
         params = config.get("mavros_params_loader", {})
-        
+
         if not params:
-            print("[WARN] No '/mavros/params' found in config file. Skipping servo setup.")
-            return []
-        
-        params = {"/**": params}
-        
-        temp_servo_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml')
-        yaml.dump(params, temp_servo_config)
-        temp_servo_config.close()
-        
-        load_params = ExecuteProcess(
-            cmd=[
-                'ros2', 'param', 'load',
-                '/mavros/param', 
-                temp_servo_config.name
-            ],
-            output='screen'
-        )
+                print("[WARN] No '/mavros/params' found in config file. Skipping servo setup.")
+                return []
+
+        for (node_name, node_params) in params.items():
+            node_params = {"/**": node_params}
+            
+            temp_servo_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml')
+            yaml.dump(node_params, temp_servo_config)
+            temp_servo_config.close()
+            
+            load_params = ExecuteProcess(
+                cmd=[
+                    'ros2', 'param', 'load',
+                    '/mavros/' + node_name, 
+                    temp_servo_config.name
+                ],
+                output='screen'
+            )
         
         return [TimerAction(period=15.0, actions=[load_params])]
             

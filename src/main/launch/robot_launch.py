@@ -70,10 +70,7 @@ def generate_launch_description():
                 PathJoinSubstitution([
                     FindPackageShare('descriptors'), 'launch', 'tf_publisher_launch.py'
                 ])
-            ]),
-            launch_arguments={
-                'config_file': LaunchConfiguration("config_file")
-            }.items()
+            ])
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
