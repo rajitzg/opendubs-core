@@ -220,7 +220,9 @@ void LLControlNode::controlLoop() {
 
     if (current_mode_ != ControlMode::MANUAL) {
         if (imu_timeout) {
-            RCLCPP_ERROR(this->get_logger(), "CRITICAL: IMU Lost! Switching to HOLD.");
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "CRITICAL: IMU Lost! Switching to HOLD.");
             setArduPilotMode(mode_hold_name_);
             
             // Output Neutral
@@ -300,7 +302,7 @@ void LLControlNode::setArduPilotMode(const std::string& mode) {
     }
 
     if (!set_mode_client_->wait_for_service(std::chrono::milliseconds(100))) {
-        RCLCPP_ERROR(this->get_logger(), "SetMode service not available");
+        RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "SetMode service not available");
         return;
     }
 

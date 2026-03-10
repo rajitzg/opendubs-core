@@ -5,8 +5,9 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 from datetime import datetime
+from std_msgs.msg import Bool
 import os
-import yaml 
+
 import subprocess
 import signal
 import shutil
@@ -16,17 +17,20 @@ class BagRecorder(Node):
         super().__init__("bag_recorder")
 
         # Grab parameters
-        self.declare_parameter("bag_path", "src/data_logging/rosbags")
-        self.declare_parameter("service_topic", "logger_command")
+        self.declare_parameter("bag_path", "opendubs-core/src/data_logging/rosbags")
+        self.declare_parameter("logger_service_name", "record_data")
         self.declare_parameter("max_record_duration", 300) # seconds
+        self.declare_parameter("is_recording_topic", "is_recording")
         self.declare_parameter("log_topics", [""])
 
         self.bag_path = self.get_parameter("bag_path")\
             .get_parameter_value().string_value
-        self.service_topic = self.get_parameter("service_topic")\
+        self.logger_service_name = self.get_parameter("logger_service_name")\
             .get_parameter_value().string_value
         self.max_record_duration = self.get_parameter("max_record_duration")\
             .get_parameter_value().integer_value
+        self.is_recording_topic = self.get_parameter("is_recording_topic")\
+            .get_parameter_value().string_value
         log_topics = self.get_parameter("log_topics")\
             .get_parameter_value().string_array_value
 
@@ -41,9 +45,10 @@ class BagRecorder(Node):
         # State
         self.recording = False
         self.rosbag_proc = None
+        self.is_recording_pub = self.create_publisher(Bool, self.is_recording_topic, 10)
 
         # Service
-        self.create_service(LoggerCommand, self.service_topic, self.service_callback)
+        self.create_service(LoggerCommand, self.logger_service_name, self.service_callback)
 
         # Watch for runtime parameter changes
         self.add_on_set_parameters_callback(self._on_set_parameters)
@@ -65,14 +70,17 @@ class BagRecorder(Node):
     # Service callbacks
     def service_callback(self, request, response):
         if request.command == LoggerCommand.Request.START_RECORDING and not self.recording:
-            self.start_recording()
-            response.success = True
+            if len(self.valid_topics) == 0:
+                self.get_logger().warning("No valid topics specified for recording.")
+                response.success = False
+            else:
+                self.start_recording()
+                response.success = True
         elif request.command == LoggerCommand.Request.STOP_AND_DISCARD_RECORDING and self.recording:
             self.stop_and_discard_recording()
             response.success = True
         elif request.command == LoggerCommand.Request.STOP_AND_SAVE_RECORDING and self.recording:
             self.stop_and_save_recording()
-            self.stop_recording()
             response.success = True
         else:
             self.get_logger().warning("Invalid command or state for recording.")
@@ -88,23 +96,31 @@ class BagRecorder(Node):
             f"ros2", f"bag", f"record",
             f"--max-bag-duration", f"{self.max_record_duration}",
             f"-o", f"{self.bag_path}/temp",
-        ] + self.valid_topics
+            f"--topics", *self.valid_topics
+        ]
 
         self.rosbag_proc = subprocess.Popen(command)
         self.recording = True
+        self.is_recording_pub.publish(Bool(data=True))
 
     def stop_and_save_recording(self):
         self.stop_recording()
         self.get_logger().info("Saving rosbag recording.")
 
-        # Rename temp bag directory
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        new_name = f"bag_{timestamp}"
+        if os.path.exists(os.path.join(self.bag_path, "temp")):
+            # Rename temp bag directory
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            new_name = f"bag_{timestamp}"
 
-        os.rename(
-            os.path.join(self.bag_path, "temp"),
-            os.path.join(self.bag_path, new_name)
-        )
+            new_path = os.path.join(self.bag_path, new_name)
+
+            os.rename(
+                os.path.join(self.bag_path, "temp"),
+                new_path
+            )
+            self.get_logger().info(f"Recording saved at {new_path}")
+        else:
+            self.get_logger().warning("Recording did not save properly.")
 
     def stop_and_discard_recording(self):
         self.stop_recording()
@@ -122,6 +138,7 @@ class BagRecorder(Node):
             self.rosbag_proc = None
 
         self.recording = False
+        self.is_recording_pub.publish(Bool(data=False))
 
 
 def main(args=None): 

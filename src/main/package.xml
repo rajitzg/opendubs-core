@@ -13,6 +13,10 @@
   <test_depend>python3-pytest</test_depend>
 
   <exec_depend>ll_control</exec_depend>
+  <exec_depend>teleop_interface</exec_depend>
+  <exec_depend>data_logging</exec_depend>
+  <exec_depend>diagnostics</exec_depend>
+  <exec_depend>descriptors</exec_depend>
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
 

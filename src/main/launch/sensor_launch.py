@@ -8,13 +8,13 @@ def generate_launch_description():
     
     return LaunchDescription([
         IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            PathJoinSubstitution([
-                FindPackageShare('sllidar_ros2'), 'launch', 'sllidar_a1_launch.py'
-            ])
-        ]),
-        launch_arguments={
-            "serial_port": "/dev/rplidar"
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('sllidar_ros2'), 'launch', 'sllidar_a1_launch.py'
+                ])
+            ]),
+            launch_arguments={
+                "serial_port": "/dev/rplidar"
             }.items()
-    )
+        )
     ])

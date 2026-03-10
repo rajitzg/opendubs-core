@@ -15,7 +15,7 @@ setup(
         (os.path.join('share', package_name, 'launch'),
             glob('launch/*.py')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'fastapi', 'uvicorn'],
     zip_safe=True,
     maintainer='rgnp',
     maintainer_email='rzghosh@gmail.com',
@@ -28,7 +28,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'teleop_interface_node = teleop_interface.teleop_interface:main',
+            'controller_interface_node = teleop_interface.controller_interface:main',
+            'api_node = teleop_interface.api_node:main',
         ],
     },
 )

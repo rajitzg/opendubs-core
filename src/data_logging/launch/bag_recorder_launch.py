@@ -15,6 +15,7 @@ def generate_launch_description():
         package="data_logging",
         executable="bag_recorder",
         name="bag_recorder",
+        namespace="data_logging",
         output="screen",
         parameters=[LaunchConfiguration("config_file")]
     )
