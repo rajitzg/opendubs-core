@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installs udev rules for OpenDubs hardware devices.
 # Creates stable /dev symlinks:
-#   /dev/rplidar  -> SLLIDAR A1 (CP2102 USB-UART)
+#   /dev/rplidar0, /dev/rplidar1  -> SLLIDAR A1 (CP2102 USB-UART)
 #   /dev/pixhawk  -> Pixhawk / ArduPilot FCU
 
 set -e
@@ -26,4 +26,4 @@ sudo udevadm trigger
 
 echo ""
 echo "Done! Replug your devices and verify with:"
-echo "  ls -l /dev/rplidar /dev/pixhawk"
+echo "  ls -l /dev/rplidar* /dev/pixhawk"
