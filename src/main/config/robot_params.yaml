@@ -74,33 +74,45 @@ data_logging:
       max_record_duration: 300
 
 mavros_params_loader:
-  ros__parameters:
-    # SERVO[output channel]_FUNCTION: 51 + [input channel]
-    # corresponds to override channels
-    SERVO1_FUNCTION: 36 # FL
-    SERVO2_FUNCTION: 33 # FR
-    SERVO3_FUNCTION: 34 # BL
-    SERVO4_FUNCTION: 35 # BR
+  params:
+    ros__parameters:
+      # SERVO[output channel]_FUNCTION: 51 + [input channel]
+      # corresponds to override channels
+      SERVO1_FUNCTION: 36 # FL
+      SERVO2_FUNCTION: 33 # FR
+      SERVO3_FUNCTION: 34 # BL
+      SERVO4_FUNCTION: 35 # BR
 
-    RCMAP_ROLL: 10 # lat (output channel 9)
-    RCMAP_YAW: 11 # yaw (output channel 10)
-    RCMAP_THROTTLE: 9 # fwd (output channel 8)
+      RCMAP_ROLL: 10 # lat (output channel 9)
+      RCMAP_YAW: 11 # yaw (output channel 10)
+      RCMAP_THROTTLE: 9 # fwd (output channel 8)
 
-    RC1_TRIM: 1500
-    RC2_TRIM: 1500
-    RC3_TRIM: 1500
-    RC4_TRIM: 1500
+      RC1_TRIM: 1500
+      RC2_TRIM: 1500
+      RC3_TRIM: 1500
+      RC4_TRIM: 1500
 
-    MODE_CH: 5
-    MODE1: 0
-    MODE2: 0
-    MODE3: 0
-    MODE4: 0
-    MODE5: 0
-    MODE6: 0
+      MODE_CH: 5
+      MODE1: 0
+      MODE2: 0
+      MODE3: 0
+      MODE4: 0
+      MODE5: 0
+      MODE6: 0
 
-    FS_ACTION: 2
-    FS_GCS_ENABLE: 1
-    FS_THR_ENABLE: 0
-    FS_TIMEOUT: 0.5
-    FS_GCS_TIMEOUT: 2.0 # for newer versions of ardupilot
+      FS_ACTION: 2
+      FS_GCS_ENABLE: 1
+      FS_THR_ENABLE: 0
+      FS_TIMEOUT: 0.5
+  local_position:
+    ros__parameters:
+      tf.send: true
+      tf.frame_id: "odom"
+      tf.child_frame_id: "base_link"
+
+descriptors:
+  odom_tf_broadcaster:
+    ros__parameters:
+      odom_frame_id: "odom"
+      base_frame_id: "base_link"
+      input_odom_topic: "/mavros/local_position/odom"
