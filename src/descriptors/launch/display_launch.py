@@ -7,7 +7,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     default_model_path = PathJoinSubstitution([
-        FindPackageShare("descriptors"), "sdf", "open_dubs_description.sdf"
+        FindPackageShare("descriptors"), "urdf", "open_dubs_description.urdf"
     ])
     default_rviz_path = PathJoinSubstitution([
         FindPackageShare("descriptors"), "rviz", "config.rviz"
@@ -41,7 +41,7 @@ def generate_launch_description():
             package='joint_state_publisher',
             executable='joint_state_publisher',
             name='joint_state_publisher',
-            parameters=[{'open_dubs_urdf': Command(['xacro ', default_model_path])}],
+            parameters=[{'open_dubs_urdf': Command(['xacro ', LaunchConfiguration('model')])}],
             condition=UnlessCondition(LaunchConfiguration('gui'))
         ),
         Node(

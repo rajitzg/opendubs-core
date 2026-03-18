@@ -57,6 +57,7 @@ def generate_launch_description():
                     FindPackageShare('main'), 'launch', 'sensor_launch.py'
                 ])
             ]),
+            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
