@@ -69,12 +69,12 @@ teleop_interface:
 data_logging:
   bag_recorder:
     ros__parameters:
-      bag_path: opendubs-core/src/data_logging/rosbags
+      bag_path: src/data_logging/rosbags
       log_topics: ["/mocap/opendubs/pose", "/mocap/opendubs/odom", "/mavros/local_position/pose", "/mavros/local_position/odom", "/mavros/imu/data"]
       max_record_duration: 300
 
 mavros_params_loader:
-  params:
+  param:
     ros__parameters:
       # SERVO[output channel]_FUNCTION: 51 + [input channel]
       # corresponds to override channels
@@ -104,6 +104,7 @@ mavros_params_loader:
       INS_POS1_Y: -0.17
       INS_POS1_Z: 0.0
 
+      FLOW_TYPE: 5
       FLOW_POS_X: 0.18
       FLOW_POS_Y: -0.1
       FLOW_POS_Z: 0.0
