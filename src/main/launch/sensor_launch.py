@@ -17,6 +17,35 @@ def generate_launch_description():
     ]
     
     launches =[
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                PathJoinSubstitution([
+                    FindPackageShare('sllidar_ros2'),
+                    'launch',
+                    'sllidar_a1_launch.py'
+                ])
+            ),
+            launch_arguments={
+                "serial_port": "/dev/ttyUSB0",
+                "frame_id": "front_lidar_link",
+                "scan_topic": "scan_front",
+            }.items()
+        ),
+
+        '''IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                PathJoinSubstitution([
+                    FindPackageShare('sllidar_ros2'),
+                    'launch',
+                    'sllidar_a1_launch.py'
+                ])
+            ),
+            launch_arguments={
+                "serial_port": "/dev/ttyUSB1",
+                "frame_id": "back_lidar_link",
+                "scan_topic": "scan_back",
+            }.items()
+        ),'''
         LaunchDescription([
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([
@@ -25,10 +54,11 @@ def generate_launch_description():
                     ])
                 ]),
                 launch_arguments={
-                    "serial_port": "/dev/rplidar"
+                    "serial_port": "/dev/ttyUSB0",
+                    "frame_id": "back_lidar_link"
                 }.items()
             )
-        ])
+        ]),
     ]
     nodes = [
         Node(
