@@ -1,3 +1,5 @@
+"""Top-level robot bringup launch for control, sensors, and diagnostics."""
+
 import os
 from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
@@ -7,6 +9,11 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    """Launch full robot stack and pass shared config to child launch files.
+
+    Returns:
+        LaunchDescription: Launch definition for integrated robot bringup.
+    """
     
     os.system('usbreset "ChibiOS/RT Virtual COM Port"')
     

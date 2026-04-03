@@ -1,3 +1,5 @@
+"""Translate RC input into normalized or velocity teleop commands."""
+
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
@@ -9,13 +11,18 @@ from std_msgs.msg import Int8
 
 
 class ControlMode(IntEnum):
+    """Drive mode values published to low-level controller."""
+
     MANUAL = 0
     VELOCITY = 1
     AUTO = 2
 
 
 class ControllerInterfaceNode(Node):
+    """ROS 2 node that converts MAVROS RC input into teleop topics."""
+
     def __init__(self):
+        """Initialize parameters, publishers, subscriptions, and startup mode."""
         super().__init__('controller_interface_node')
 
         # --- Parameters ---
@@ -78,6 +85,7 @@ class ControllerInterfaceNode(Node):
     # Parameter loading
     # -----------------------------------------------------------------------
     def _load_params(self):
+        """Load declared parameters into instance fields."""
         self._ch_fwd = self.get_parameter('input_ch_fwd').value
         self._ch_lat = self.get_parameter('input_ch_lat').value
         self._ch_yaw = self.get_parameter('input_ch_yaw').value
@@ -94,6 +102,13 @@ class ControllerInterfaceNode(Node):
     # RC Callback
     # -----------------------------------------------------------------------
     def _rc_callback(self, msg: RCIn):
+        """
+        Process RC channels and publish mode/cmd_vel outputs.
+        If the controller is disconnected, withhold cmd_vel to trigger ll_control's timeout behavior.
+
+        Args:
+            msg (RCIn): MAVROS RC input message.
+        """
         ch = msg.channels
         n = len(ch)
 
@@ -159,7 +174,14 @@ class ControllerInterfaceNode(Node):
     # Helpers
     # -----------------------------------------------------------------------
     def _normalize(self, pwm: int) -> float:
-        """Convert PWM (1000..2000) to normalized (-1..1) with deadband."""
+        """Convert PWM command to normalized setpoint with deadband.
+
+        Args:
+            pwm (int): RC PWM value, in the range 1000 to 2000.
+
+        Returns:
+            float: Saturated normalized value in the range -1.0 to 1.0.
+        """
         norm = (float(pwm) - 1500.0) / 500.0
         norm = max(-1.0, min(1.0, norm))
         if abs(norm) < self._deadband:
@@ -167,11 +189,21 @@ class ControllerInterfaceNode(Node):
         return norm
 
     def _publish_mode(self, mode: ControlMode):
+        """Publish currently selected control mode.
+
+        Args:
+            mode (ControlMode): Mode enum to publish.
+        """
         msg = Int8()
         msg.data = int(mode)
         self._mode_pub.publish(msg)
 
 def main(args=None):
+    """Run the controller interface node until shutdown.
+
+    Args:
+        args (list[str] | None): Optional ROS CLI arguments.
+    """
     rclpy.init(args=args)
     node = ControllerInterfaceNode()
     try:

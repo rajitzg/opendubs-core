@@ -1,3 +1,5 @@
+"""Launch lidar sensor driver stack."""
+
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.substitutions import PathJoinSubstitution
@@ -5,6 +7,11 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    """Launch RPLidar bringup with udev-based serial port mapping.
+
+    Returns:
+        LaunchDescription: Launch definition for lidar driver include.
+    """
     
     return LaunchDescription([
         IncludeLaunchDescription(
