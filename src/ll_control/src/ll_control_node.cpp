@@ -2,6 +2,12 @@
 
 namespace ll_control {
 
+/**
+ * @brief Construct and initialize the low-level controller ROS node.
+ *
+ * This sets up parameters, PID controllers, subscriptions, publishers,
+ * diagnostics, and the 50 Hz control timer.
+ */
 LLControlNode::LLControlNode() : Node("ll_control_node") {
     // Declare and get parameters
     debug_mode = this->declare_parameter("debug_mode", debug_mode);
@@ -109,6 +115,9 @@ LLControlNode::LLControlNode() : Node("ll_control_node") {
     }
 }
 
+/**
+ * @brief Safely hand control back to ArduPilot and publish neutral RC values.
+ */
 LLControlNode::~LLControlNode() {
     RCLCPP_WARN(this->get_logger(), "Shutting down LL Control Node. Switching to HOLD and resetting RC Overrides to Neutral (1500).");
 
@@ -128,11 +137,20 @@ LLControlNode::~LLControlNode() {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
+/**
+ * @brief Cache the latest velocity command from teleoperation.
+ */
 void LLControlNode::cmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
     current_cmd_vel_ = *msg;
     last_cmd_vel_time_ = this->now();
 }
 
+/**
+ * @brief Update controller mode based on teleop mode topic.
+ *
+ * Entering velocity mode resets PID internal state to avoid stale integrator
+ * and derivative terms from previous modes.
+ */
 void LLControlNode::modeCallback(const std_msgs::msg::Int8::SharedPtr msg) {
     ControlMode new_mode = static_cast<ControlMode>(msg->data);
 
@@ -149,12 +167,23 @@ void LLControlNode::modeCallback(const std_msgs::msg::Int8::SharedPtr msg) {
     }
 }
 
+/**
+ * @brief Consume odometry data for health monitoring and PID loop feedback
+ * 
+ * WIP
+ */
 void LLControlNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
     // TODO: implement odom callback
     (void)msg;
     odom_received_ = true;
 }
 
+/**
+ * @brief Consume IMU data for yaw-rate feedback and health monitoring.
+ *
+ * This callback stores the current yaw rate and maintains a smoothed estimate
+ * of IMU publish frequency used by safety checks in the control loop.
+ */
 void LLControlNode::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg) {
     rclcpp::Time now = this->now();
 
@@ -168,6 +197,9 @@ void LLControlNode::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg) {
     last_imu_msg_time_ = now;
 }
 
+/**
+ * @brief Report command input freshness and mode via ROS diagnostics.
+ */
 void LLControlNode::publishInputStatus(diagnostic_updater::DiagnosticStatusWrapper &stat) {
     double cmd_vel_age = (this->now() - last_cmd_vel_time_).seconds();
     if (cmd_vel_age > cmd_vel_timeout_threshold_) {
@@ -179,6 +211,9 @@ void LLControlNode::publishInputStatus(diagnostic_updater::DiagnosticStatusWrapp
     stat.add("Current Mode", static_cast<int>(current_mode_));
 }
 
+/**
+ * @brief Report IMU freshness and IMU rate via ROS diagnostics.
+ */
 void LLControlNode::publishSensorStatus(diagnostic_updater::DiagnosticStatusWrapper &stat) {
     double imu_age = (this->now() - last_imu_msg_time_).seconds();
     if (imu_age > imu_timeout_threshold_) {
@@ -192,6 +227,15 @@ void LLControlNode::publishSensorStatus(diagnostic_updater::DiagnosticStatusWrap
     stat.add("IMU Freq (hz)", current_imu_freq_);
 }
 
+/**
+ * @brief Main 50 Hz control loop.
+ *
+ * Responsibilities:
+ * - Enforce safety interlocks (cmd_vel timeout, IMU timeout/rate checks)
+ * - Select control behavior by mode
+ * - Run PID controllers where applicable
+ * - Map normalized outputs onto RC override channels and publish
+ */
 void LLControlNode::controlLoop() {
     auto msg = mavros_msgs::msg::OverrideRCIn();
     std::fill(msg.channels.begin(), msg.channels.end(), 65535);
@@ -283,6 +327,11 @@ void LLControlNode::controlLoop() {
     rc_override_pub_->publish(msg);
 }
 
+/**
+ * @brief Request an ArduPilot mode change through MAVROS SetMode.
+ *
+ * Calls are rate-limited and skipped entirely in debug mode.
+ */
 void LLControlNode::setArduPilotMode(const std::string& mode) {
     double now_sec = this->now().seconds();
     if (now_sec - last_set_mode_time_sec_ < 1.0) {
@@ -323,6 +372,11 @@ void LLControlNode::setArduPilotMode(const std::string& mode) {
     set_mode_client_->async_send_request(request, response_received_callback);
 }
 
+/**
+ * @brief Handle runtime parameter updates for PID and safety settings.
+ *
+ * Updated PID values are reconfigured immediately without restarting the node.
+ */
 rcl_interfaces::msg::SetParametersResult LLControlNode::parametersCallback(const std::vector<rclcpp::Parameter> &parameters) {
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
@@ -373,6 +427,9 @@ rcl_interfaces::msg::SetParametersResult LLControlNode::parametersCallback(const
 
 } // namespace ll_control
 
+/**
+ * @brief Entry point for the low-level controller executable.
+ */
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<ll_control::LLControlNode>());

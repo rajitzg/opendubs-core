@@ -1,3 +1,5 @@
+"""Launch MAVROS and load post-startup parameter overrides."""
+
 import yaml
 import tempfile
 from launch import LaunchDescription
@@ -7,6 +9,16 @@ from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 def load_mavros_params(context, *args, **kwargs):
+    """Create a delayed `ros2 param load` action from launch config.
+
+    Args:
+        context: Launch runtime context used to resolve substitutions.
+        *args: Unused positional launch callback arguments.
+        **kwargs: Unused keyword launch callback arguments.
+
+    Returns:
+        list: TimerAction list when params are present, otherwise empty list.
+    """
     config_path = LaunchConfiguration("config_file").perform(context)
     
     try:
@@ -42,6 +54,12 @@ def load_mavros_params(context, *args, **kwargs):
         return []
 
 def generate_launch_description():
+    """Launch MAVROS APM launch file and deferred parameter loader.
+
+    Returns:
+        LaunchDescription: Launch definition for MAVROS bringup.
+    """
+    
     config_launch_arg = DeclareLaunchArgument("config_file")
     fcu_launch_arg = DeclareLaunchArgument("fcu_url", default_value="/dev/pixhawk:57600")
     gcs_launch_arg = DeclareLaunchArgument("gcs_url", default_value="")

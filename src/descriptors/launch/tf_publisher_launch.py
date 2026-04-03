@@ -1,3 +1,5 @@
+"""Launch robot_state_publisher for static TF/model publication."""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
@@ -5,6 +7,11 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    """Launch robot_state_publisher from a configurable model file.
+
+    Returns:
+        LaunchDescription: Launch setup for TF/model publication.
+    """
     default_model_path = PathJoinSubstitution([
         FindPackageShare("descriptors"), "urdf", "open_dubs_description.urdf"
     ])

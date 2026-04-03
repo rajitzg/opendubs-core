@@ -1,9 +1,16 @@
+"""Launch diagnostic aggregation using package diagnostics config."""
+
 from launch import LaunchDescription
 from launch_ros.actions import Node
 import os
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
+    """Launch diagnostic_aggregator node with diagnostics YAML.
+
+    Returns:
+        LaunchDescription: Launch definition for diagnostics aggregator.
+    """
     pkg_share = get_package_share_directory('diagnostics')
     config_file = os.path.join(pkg_share, 'config', 'diagnostics.yaml')
 

@@ -1,9 +1,16 @@
+"""Launch the low-level controller node with optional debug mode."""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 def generate_launch_description():
+    """Launch ll_control with parameter file and debug mode argument.
+
+    Returns:
+        LaunchDescription: Launch definition for ll_control node.
+    """
     
     config_launch_arg = DeclareLaunchArgument("config_file")
     debug_mode_launch_arg = DeclareLaunchArgument("debug_mode", default_value="false")

@@ -1,13 +1,19 @@
+"""FastAPI router for controlling and querying rosbag logging state."""
+
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from interfaces.srv import LoggerCommand
 
 # --- Pydantic Models ---
 class LoggerResponse(BaseModel):
+    """HTTP response model for logger command endpoints."""
+
     success: bool
     message: str
 
 class StatusResponse(BaseModel):
+    """HTTP response model for logger status endpoint."""
+
     is_recording: bool
 
 # Create a FastAPI router
@@ -17,6 +23,14 @@ router = APIRouter()
 
 @router.post("/logger/start", response_model=LoggerResponse)
 def start_logger(request: Request):
+    """Start rosbag recording through the ROS logger service.
+
+    Args:
+        request (Request): FastAPI request containing app state with ROS node.
+
+    Returns:
+        LoggerResponse: Success message when recording starts.
+    """
     # Access the ros_node injected into app state
     ros_node = request.app.state.ros_node
     if ros_node is None:
@@ -30,6 +44,14 @@ def start_logger(request: Request):
 
 @router.post("/logger/stop_and_save", response_model=LoggerResponse)
 def stop_logger(request: Request):
+    """Stop recording and persist bag files.
+
+    Args:
+        request (Request): FastAPI request containing app state with ROS node.
+
+    Returns:
+        LoggerResponse: Success message when recording is saved.
+    """
     ros_node = request.app.state.ros_node
     if ros_node is None:
         raise HTTPException(status_code=500, detail="ROS node not initialized")
@@ -42,6 +64,14 @@ def stop_logger(request: Request):
 
 @router.post("/logger/stop_and_discard", response_model=LoggerResponse)
 def stop_discard_logger(request: Request):
+    """Stop recording and discard temporary bag files.
+
+    Args:
+        request (Request): FastAPI request containing app state with ROS node.
+
+    Returns:
+        LoggerResponse: Success message when recording is discarded.
+    """
     ros_node = request.app.state.ros_node
     if ros_node is None:
         raise HTTPException(status_code=500, detail="ROS node not initialized")
@@ -54,6 +84,14 @@ def stop_discard_logger(request: Request):
 
 @router.get("/logger/status", response_model=StatusResponse)
 def get_logger_status(request: Request):
+    """Return whether the recorder is currently active.
+
+    Args:
+        request (Request): FastAPI request containing app state with ROS node.
+
+    Returns:
+        StatusResponse: Current `is_recording` state.
+    """
     ros_node = request.app.state.ros_node
     if ros_node is None:
         raise HTTPException(status_code=500, detail="ROS node not initialized")

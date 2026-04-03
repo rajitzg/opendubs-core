@@ -1,3 +1,5 @@
+"""ROS 2 + FastAPI bridge for teleop logging control endpoints."""
+
 import rclpy
 from rclpy.node import Node
 from fastapi import FastAPI
@@ -27,7 +29,10 @@ ros_node = None
 
 
 class APINode(Node):
+    """Expose logger controls from ROS services to the FastAPI layer."""
+
     def __init__(self):
+        """Initialize API node parameters, logger client, and subscriptions."""
         super().__init__('api_node')
 
         # --- Parameters ---
@@ -52,7 +57,16 @@ class APINode(Node):
         self.get_logger().info('API Node initialized.')
 
     def send_logger_command(self, command: int) -> bool:
-        """Call the LoggerCommand service and wait for the result."""
+        """
+        Call LoggerCommand service and wait for completion.
+        Blocks subsequent fastapi calls until the service response is received or times out.
+
+        Args:
+            command (int): Logger command enum value from LoggerCommand.Request.
+
+        Returns:
+            bool: True when service call succeeds and response is successful.
+        """
         if not self._logger_client.service_is_ready():
             self.get_logger().warning(
                 f'Logger service "{self.logger_service_name}" not available.')
@@ -86,15 +100,29 @@ class APINode(Node):
         return False
 
     def is_recording_callback(self, msg: Bool):
+        """Cache recording-state updates from the recorder node.
+
+        Args:
+            msg (Bool): Topic message indicating current recording state.
+        """
         self.is_recording = msg.data
 
 
 def ros2_thread_func(node):
-    """Function to run the ROS 2 executor in a separate thread."""
+    """Run a ROS 2 spin loop on a background thread.
+
+    Args:
+        node (Node): ROS node instance to spin.
+    """
     rclpy.spin(node)
 
 
 def main(args=None):
+    """Start ROS node and serve FastAPI endpoints.
+
+    Args:
+        args (list[str] | None): Optional ROS CLI arguments.
+    """
     rclpy.init(args=args)
     ros_node = APINode()
     

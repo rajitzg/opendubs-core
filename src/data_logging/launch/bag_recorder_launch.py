@@ -1,3 +1,5 @@
+"""Launch the data logging node for rosbag recording services."""
+
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -8,6 +10,11 @@ import os
 import yaml
 
 def generate_launch_description():
+    """Launch the bag recorder node using an external config file.
+
+    Returns:
+        LaunchDescription: Launch definition for data logging recorder service.
+    """
     # Get config path
     config_launch_arg = DeclareLaunchArgument("config_file")
 

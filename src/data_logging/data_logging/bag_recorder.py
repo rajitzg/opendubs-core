@@ -1,3 +1,5 @@
+"""ROS 2 service node for starting and stopping rosbag recordings."""
+
 from interfaces.srv import LoggerCommand
 
 import rclpy
@@ -13,7 +15,10 @@ import signal
 import shutil
 
 class BagRecorder(Node):
+    """Manage rosbag recording lifecycle through a LoggerCommand service."""
+
     def __init__(self):
+        """Initialize recorder parameters, state, publisher, and service."""
         super().__init__("bag_recorder")
 
         # Grab parameters
@@ -57,6 +62,14 @@ class BagRecorder(Node):
 
     # Parameter change callback
     def _on_set_parameters(self, params):
+        """Handle runtime parameter updates.
+
+        Args:
+            params (list[rclpy.parameter.Parameter]): Updated parameter values.
+
+        Returns:
+            SetParametersResult: Success result for accepted parameter updates.
+        """
         for param in params:
             if param.name == "log_topics" and param.type_ == Parameter.Type.STRING_ARRAY:
                 new_topics = [t for t in param.value if t]
@@ -69,6 +82,15 @@ class BagRecorder(Node):
 
     # Service callbacks
     def service_callback(self, request, response):
+        """Dispatch logger service commands to recorder actions.
+
+        Args:
+            request (LoggerCommand.Request): Incoming service command.
+            response (LoggerCommand.Response): Mutable response object.
+
+        Returns:
+            LoggerCommand.Response: Response with the success flag populated.
+        """
         if request.command == LoggerCommand.Request.START_RECORDING and not self.recording:
             if len(self.valid_topics) == 0:
                 self.get_logger().warning("No valid topics specified for recording.")
@@ -90,6 +112,7 @@ class BagRecorder(Node):
 
     # Recording logic
     def start_recording(self):
+        """Start a rosbag record subprocess for configured topics."""
         self.get_logger().info("Starting rosbag recording.")
 
         command = [
@@ -104,6 +127,7 @@ class BagRecorder(Node):
         self.is_recording_pub.publish(Bool(data=True))
 
     def stop_and_save_recording(self):
+        """Stop active recording and persist temp bag data with a timestamp."""
         self.stop_recording()
         self.get_logger().info("Saving rosbag recording.")
 
@@ -123,6 +147,7 @@ class BagRecorder(Node):
             self.get_logger().warning("Recording did not save properly.")
 
     def stop_and_discard_recording(self):
+        """Stop active recording and delete temporary bag files."""
         self.stop_recording()
         self.get_logger().info("Discarding rosbag recording.")
 
@@ -131,6 +156,7 @@ class BagRecorder(Node):
             shutil.rmtree(tmp_path)
 
     def stop_recording(self):
+        """Stop the rosbag subprocess and publish recorder state."""
         self.get_logger().info("Stopping recording.")
         if self.rosbag_proc:
             self.rosbag_proc.send_signal(signal.SIGINT)
@@ -142,6 +168,11 @@ class BagRecorder(Node):
 
 
 def main(args=None): 
+    """Run the bag recorder node until shutdown.
+
+    Args:
+        args (list[str] | None): Optional ROS CLI arguments.
+    """
     rclpy.init() 
     node = BagRecorder() 
     

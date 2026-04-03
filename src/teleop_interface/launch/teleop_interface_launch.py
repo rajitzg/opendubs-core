@@ -1,3 +1,5 @@
+"""Launch teleop input interface and REST API bridge nodes."""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -5,6 +7,11 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    """Launch teleop controller interface and API nodes.
+
+    Returns:
+        LaunchDescription: Launch definition for teleop subsystem.
+    """
 
     config_launch_arg = DeclareLaunchArgument('config_file')
 

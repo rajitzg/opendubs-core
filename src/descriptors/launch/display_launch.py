@@ -1,3 +1,5 @@
+"""Launch robot model visualization nodes and RViz display."""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
@@ -6,6 +8,11 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    """Launch robot_state_publisher, joint state publisher, and RViz.
+
+    Returns:
+        LaunchDescription: Launch setup for model and visualization tools.
+    """
     default_model_path = PathJoinSubstitution([
         FindPackageShare("descriptors"), "urdf", "open_dubs_description.urdf"
     ])
