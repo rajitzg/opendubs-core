@@ -49,6 +49,29 @@ In the file, there is a section called `mavros_params_loader` which is used for 
 [!NOTE]
 Some of these parameters might require an ardupilot reboot to take effect. This means you might have to launch the system until the params are set, reboot the pixhawk, and launch the system again.
 
+## Data Logging
+In order to enable or disable data logging, run:
+```bash
+ros2 service call /record_data interfaces/srv/LoggerCommand "{command: <cmd>}"
+```
+where \<cmd> is:
+- 0 for START_RECORDING
+- 1 for STOP_AND_DISCARD_RECORDING
+- 2 for STOP_AND_SAVE_RECORDING
+
+This can also be run wirelessly through HTTP posts:
+```bash
+http://<ip>:<port>/logger/start             # start logging
+http://<ip>:<port>/logger/stop_and_save     # stop and save
+http://<ip>:<port>/logger/stop_and_discard  # discard
+```
+
+and you can also retrieve the logging status with an HTTP get:
+```bash
+http://<ip>:<port>/logger/status
+```
+
+One way to do this is with an ESP32 script, [like this one](https://github.com/rajitzg/Tab5-Frontend) designed for the [M5Stack Tab5](https://shop.m5stack.com/products/m5stack-tab5-iot-development-kit-esp32-p4). This allows for a permanent wireless touchscreen interface for additional robot controls.
 
 ## System Architecture
 ![System flowchart (yellow items are WIP)](docs/flowchart.png)
