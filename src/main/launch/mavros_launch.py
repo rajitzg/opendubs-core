@@ -43,8 +43,8 @@ def load_mavros_params(context, *args, **kwargs):
 
 def generate_launch_description():
     config_launch_arg = DeclareLaunchArgument("config_file")
-    fcu_launch_arg = DeclareLaunchArgument("fcu_url", default_value="/dev/pixhawk:57600")
-    gcs_launch_arg = DeclareLaunchArgument("gcs_url", default_value="")
+    fcu_launch_arg = DeclareLaunchArgument("fcu_url", default_value="/dev/ttyACM0:57600")
+    gcs_launch_arg = DeclareLaunchArgument("gcs_url", default_value="udp://@10.18.153.129")
     
     launch_args = [config_launch_arg, fcu_launch_arg, gcs_launch_arg]
     

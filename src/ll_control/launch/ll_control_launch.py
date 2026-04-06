@@ -21,5 +21,15 @@ def generate_launch_description():
                 LaunchConfiguration('config_file'),
                 {'debug_mode': LaunchConfiguration('debug_mode')}
             ]
+        ),
+        Node(
+            package='ll_control',
+            executable='pixhawk_processing_node',
+            namespace='ll_control',
+            name='pixhawk_processing_node',
+            output='screen',
+            parameters=[
+                LaunchConfiguration('config_file')
+            ]
         )
     ])

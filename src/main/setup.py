@@ -29,6 +29,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'ekf_initializer = main.ekf_initializer:main',
         ],
     },
 )

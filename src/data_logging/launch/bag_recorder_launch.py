@@ -4,9 +4,6 @@ from ament_index_python.packages import get_package_share_directory
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
-import os
-import yaml
-
 def generate_launch_description():
     # Get config path
     config_launch_arg = DeclareLaunchArgument("config_file")

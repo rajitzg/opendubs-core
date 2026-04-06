@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
+find_package(message_filters REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -35,8 +36,17 @@ ament_target_dependencies(ll_control_node
   diagnostic_updater
 )
 
+add_executable(pixhawk_processing_node src/pixhawk_processing_node.cpp)
+ament_target_dependencies(pixhawk_processing_node
+  rclcpp
+  nav_msgs
+  geometry_msgs
+  message_filters
+)
+
 install(TARGETS
   ll_control_node
+  pixhawk_processing_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

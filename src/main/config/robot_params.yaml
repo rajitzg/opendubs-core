@@ -70,7 +70,7 @@ data_logging:
   bag_recorder:
     ros__parameters:
       bag_path: opendubs-core/src/data_logging/rosbags
-      log_topics: ["/mocap/localization/pose", "/mocap/localization/odom"]
+      log_topics: ["/mocap/opendubs/pose", "/mocap/opendubs/odom", "/mavros/local_position/pose", "/mavros/local_position/odom", "/mavros/imu/data"]
       max_record_duration: 300
 
 mavros_params_loader:
@@ -100,6 +100,14 @@ mavros_params_loader:
       MODE5: 0
       MODE6: 0
 
+      INS_POS1_X: 0.1
+      INS_POS1_Y: -0.17
+      INS_POS1_Z: 0.0
+
+      FLOW_POS_X: 0.18
+      FLOW_POS_Y: -0.1
+      FLOW_POS_Z: 0.0
+
       FS_ACTION: 2
       FS_GCS_ENABLE: 1
       FS_THR_ENABLE: 0
@@ -116,3 +124,11 @@ descriptors:
       odom_frame_id: "odom"
       base_frame_id: "base_link"
       input_odom_topic: "/mavros/local_position/odom"
+
+main:
+  ekf_initializer:
+    ros__parameters:
+      use_gps: false
+      home_latitude: 47.65329
+      home_longitude: -122.30550
+      home_altitude: 0.0

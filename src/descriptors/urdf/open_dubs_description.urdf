@@ -12,6 +12,12 @@
     <xacro:property name="wheel_zoff" value="-0.11945"/>
     <xacro:property name="wheel_xoff" value="0.1778"/>
 
+    <xacro:property name="lidar_radius" value="0.0273"/>
+    <xacro:property name="lidar_height" value="0.0254"/>
+    <xacro:property name="lidar_xoff" value="0.26225"/>
+    <xacro:property name="lidar_yoff" value="0.0"/>
+    <xacro:property name="lidar_zoff" value="-0.09603"/>
+
     <!-- Define inertial property macros  -->
     <xacro:macro name="box_inertia" params="m w h d">
         <inertial>
@@ -101,4 +107,42 @@
     <xacro:wheel prefix="drivewhl_FR" x_reflect=" 1" y_reflect="-1" />
     <xacro:wheel prefix="drivewhl_BL" x_reflect="-1" y_reflect=" 1" />
     <xacro:wheel prefix="drivewhl_BR" x_reflect="-1" y_reflect="-1" />
+
+    <!-- Lidar -->
+
+    <xacro:macro name="lidar" params="prefix x_reflect">
+        <link name="${prefix}_link">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.125"/>
+                <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+            </inertial>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+                </geometry>
+            </collision>
+
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+                </geometry>
+                <material name="Black">
+                    <color rgba="0.0 0.0 0.0 1.0"/>
+                </material>
+            </visual>
+        </link>
+
+        <joint name="${prefix}_joint" type="fixed">
+            <parent link="frame_link"/>
+            <child link="${prefix}_link"/>
+            <origin xyz="${x_reflect*lidar_xoff} ${lidar_yoff} ${lidar_zoff}" rpy="0 0 0"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:lidar prefix="front_lidar" x_reflect="1"/>
+    <xacro:lidar prefix="back_lidar" x_reflect="-1"/>
 </robot>
