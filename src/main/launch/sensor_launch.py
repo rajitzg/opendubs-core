@@ -16,7 +16,7 @@ def generate_launch_description():
         DeclareLaunchArgument("config_file", default_value=default_config_path),
     ]
     
-    launches =[
+    launches = [
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 PathJoinSubstitution([
@@ -31,8 +31,7 @@ def generate_launch_description():
                 "scan_topic": "scan_front",
             }.items()
         ),
-
-        '''IncludeLaunchDescription(
+        IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 PathJoinSubstitution([
                     FindPackageShare('sllidar_ros2'),
@@ -45,7 +44,7 @@ def generate_launch_description():
                 "frame_id": "back_lidar_link",
                 "scan_topic": "scan_back",
             }.items()
-        ),'''
+        ),
         LaunchDescription([
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([
