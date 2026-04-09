@@ -21,7 +21,7 @@ def generate_launch_description():
             package="main",
             executable="ekf_initializer",
             name="ekf_initializer",
-            namespace="main",
+            namespace="sensors",
             output="screen",
             parameters=[LaunchConfiguration("config_file")]
         ),
@@ -31,11 +31,7 @@ def generate_launch_description():
             name="sllidar_front_node",
             namespace="sensors",
             output="screen",
-            parameters=[{
-                'serial_port': '/dev/rplidar1',
-                'serial_baudrate': 115200,
-                'frame_id': 'front_lidar_link',
-            }],
+            parameters=[LaunchConfiguration("config_file")],
             remappings=[('scan', 'scan_front')]
         ),
         Node(
@@ -44,12 +40,20 @@ def generate_launch_description():
             name="sllidar_back_node",
             namespace="sensors",
             output="screen",
-            parameters=[{
-                'serial_port': '/dev/rplidar0',
-                'serial_baudrate': 115200,
-                'frame_id': 'back_lidar_link',
-            }],
+            parameters=[LaunchConfiguration("config_file")],
             remappings=[('scan', 'scan_back')]
+        ),
+        Node(
+            package="main",
+            executable="lidar_merger",
+            name="lidar_merger_node",
+            namespace="sensors",
+            output="screen",
+            parameters=[LaunchConfiguration("config_file")],
+            remappings=[
+                ('scan_input1', 'scan_front'),
+                ('scan_input2', 'scan_back')
+            ]
         )
     ]
 

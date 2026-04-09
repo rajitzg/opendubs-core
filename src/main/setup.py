@@ -31,6 +31,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ekf_initializer = main.ekf_initializer:main',
+            'lidar_merger = main.lidar_merger:main',
         ],
     },
 )

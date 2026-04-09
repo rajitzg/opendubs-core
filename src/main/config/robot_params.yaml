@@ -126,10 +126,28 @@ descriptors:
       base_frame_id: "base_link"
       input_odom_topic: "/mavros/local_position/odom"
 
-main:
+sensors:
   ekf_initializer:
     ros__parameters:
       use_gps: false
       home_latitude: 47.65329
       home_longitude: -122.30550
       home_altitude: 0.0
+  sllidar_front_node:
+    ros__parameters:
+      serial_port: "/dev/rplidar0"
+      serial_baudrate: 115200
+      frame_id: "front_lidar_link"
+      angle_compensate: True
+  sllidar_back_node:
+    ros__parameters:
+      serial_port: "/dev/rplidar1"
+      serial_baudrate: 115200
+      frame_id: "back_lidar_link"
+      angle_compensate: True
+  lidar_merger_node:
+    ros__parameters:
+      target_frame: "base_link"
+      scan_output: "/scan"
+      lidar1_angle_offset: 180.0
+      lidar2_angle_offset: 0.0
