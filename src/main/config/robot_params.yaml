@@ -149,5 +149,4 @@ sensors:
     ros__parameters:
       target_frame: "base_link"
       scan_output: "/scan"
-      lidar1_angle_offset: 180.0
-      lidar2_angle_offset: 0.0
+      min_range: 0.2

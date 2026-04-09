@@ -13,8 +13,7 @@ class LidarMerger(Node):
 
         self.declare_parameter("target_frame", "base_link")
         self.declare_parameter("scan_output", "scan_merged")
-        self.declare_parameter("lidar1_angle_offset", 0.0)
-        self.declare_parameter("lidar2_angle_offset", 0.0)
+        self.declare_parameter("min_range", 0.1)
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
@@ -60,6 +59,11 @@ class LidarMerger(Node):
         resampled_ranges[resampled_ranges > scan_msg.range_max] = float('inf')
                       
         return resampled_ranges.tolist()
+
+    # Filter out points that are below the minimum range threshold
+    def apply_min_range(self, ranges):
+        min_range = self.get_parameter("min_range").value
+        return [float("inf") if value < min_range else value for value in ranges]
     
     # Transform scan points to target frame
     def transform_scan(self, ranges, scan_msgs):
@@ -152,8 +156,11 @@ class LidarMerger(Node):
         resampled_ranges1 = self.resample_scan(scan1_msg.ranges, scan1_msg, merged_scan.angle_increment)
         resampled_ranges2 = self.resample_scan(scan2_msg.ranges, scan2_msg, merged_scan.angle_increment)
 
-        transformed_ranges1 = self.transform_scan(resampled_ranges1, scan1_msg)
-        transformed_ranges2 = self.transform_scan(resampled_ranges2, scan2_msg)
+        filtered_ranges1 = self.apply_min_range(resampled_ranges1)
+        filtered_ranges2 = self.apply_min_range(resampled_ranges2)
+
+        transformed_ranges1 = self.transform_scan(filtered_ranges1, scan1_msg)
+        transformed_ranges2 = self.transform_scan(filtered_ranges2, scan2_msg)
 
         all_points = transformed_ranges1 + transformed_ranges2
         merged_scan.ranges = self.points_to_ranges(all_points, merged_scan)
