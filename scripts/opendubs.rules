@@ -1,14 +1,15 @@
-# OpenDubs udev rules
-# Provides stable /dev symlinks for hardware devices used in the OpenDubs robot.
-#
-# To install: run scripts/create_udev_rules.sh
-# To verify: ls -l /dev/rplidar /dev/pixhawk
+# OpenDubs udev rules 
+# Provides stable /dev symlinks for hardware devices used in the OpenDubs robot. 
+# 
+# To install: run scripts/create_udev_rules.sh 
+# To verify: ls -l /dev/rplidar0 /dev/rplidar1 /dev/pixhawk 
 
-# --- SLLIDAR A1 (Silicon Labs CP2102 USB-UART) ---
-# Vendor: Silicon Labs (10c4), Product: CP210x (ea60)
-KERNEL=="ttyUSB0", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="rplidar0"
-KERNEL=="ttyUSB1", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="rplidar1"
+# --- SLLIDAR A1 (Silicon Labs CP2102 USB-UART) --- 
+# rplidar0 = physical port 1-4.1.1.1.1 (left/first port on hub) 
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", KERNELS=="1-4.1.1.1.1", MODE:="0666", SYMLINK+="rplidar0"
 
-# --- Pixhawk 2.4.8 / ArduPilot FCU (native USB, pid.codes VID) ---
-# Vendor: pid.codes (1209) — used by Pixhawk 2.4.8 clones
-KERNEL=="ttyACM*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5741", MODE:="0666", SYMLINK+="pixhawk"
+# rplidar1 = physical port 1-4.1.1.1.2 (right/second port on hub) 
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", KERNELS=="1-4.1.1.1.2", MODE:="0666", SYMLINK+="rplidar1"
+
+# --- Pixhawk 2.4.8 / ArduPilot FCU (native USB, pid.codes VID) --- 
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5741", MODE:="0666", SYMLINK+="pixhawk" 

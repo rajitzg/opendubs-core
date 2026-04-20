@@ -18,6 +18,8 @@
     <xacro:property name="lidar_yoff" value="0.0"/>
     <xacro:property name="lidar_zoff" value="-0.09603"/>
 
+    <xacro:property name="deg_to_rad" value="${pi/180}"/>
+
     <!-- Define inertial property macros  -->
     <xacro:macro name="box_inertia" params="m w h d">
         <inertial>
@@ -110,7 +112,7 @@
 
     <!-- Lidar -->
 
-    <xacro:macro name="lidar" params="prefix x_reflect">
+    <xacro:macro name="lidar" params="prefix x_reflect yaw_offset">
         <link name="${prefix}_link">
             <inertial>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -139,10 +141,10 @@
         <joint name="${prefix}_joint" type="fixed">
             <parent link="frame_link"/>
             <child link="${prefix}_link"/>
-            <origin xyz="${x_reflect*lidar_xoff} ${lidar_yoff} ${lidar_zoff}" rpy="0 0 0"/>
+            <origin xyz="${x_reflect*lidar_xoff} ${lidar_yoff} ${lidar_zoff}" rpy="0 0 ${yaw_offset*deg_to_rad}"/>
         </joint>
     </xacro:macro>
 
-    <xacro:lidar prefix="front_lidar" x_reflect="1"/>
-    <xacro:lidar prefix="back_lidar" x_reflect="-1"/>
+    <xacro:lidar prefix="front_lidar" x_reflect="1" yaw_offset="180"/>
+    <xacro:lidar prefix="back_lidar" x_reflect="-1" yaw_offset="0"/>
 </robot>

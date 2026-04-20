@@ -16,58 +16,45 @@ def generate_launch_description():
         DeclareLaunchArgument("config_file", default_value=default_config_path),
     ]
     
-    launches = [
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution([
-                    FindPackageShare('sllidar_ros2'),
-                    'launch',
-                    'sllidar_a1_launch.py'
-                ])
-            ),
-            launch_arguments={
-                "serial_port": "/dev/ttyUSB0",
-                "frame_id": "front_lidar_link",
-                "scan_topic": "scan_front",
-            }.items()
-        ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution([
-                    FindPackageShare('sllidar_ros2'),
-                    'launch',
-                    'sllidar_a1_launch.py'
-                ])
-            ),
-            launch_arguments={
-                "serial_port": "/dev/ttyUSB1",
-                "frame_id": "back_lidar_link",
-                "scan_topic": "scan_back",
-            }.items()
-        ),
-        LaunchDescription([
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([
-                    PathJoinSubstitution([
-                        FindPackageShare('sllidar_ros2'), 'launch', 'sllidar_a1_launch.py'
-                    ])
-                ]),
-                launch_arguments={
-                    "serial_port": "/dev/ttyUSB0",
-                    "frame_id": "back_lidar_link"
-                }.items()
-            )
-        ]),
-    ]
     nodes = [
         Node(
             package="main",
             executable="ekf_initializer",
             name="ekf_initializer",
-            namespace="main",
+            namespace="sensors",
             output="screen",
             parameters=[LaunchConfiguration("config_file")]
+        ),
+        Node(
+            package="sllidar_ros2",
+            executable="sllidar_node",
+            name="sllidar_front_node",
+            namespace="sensors",
+            output="screen",
+            parameters=[LaunchConfiguration("config_file")],
+            remappings=[('scan', 'scan_front')]
+        ),
+        Node(
+            package="sllidar_ros2",
+            executable="sllidar_node",
+            name="sllidar_back_node",
+            namespace="sensors",
+            output="screen",
+            parameters=[LaunchConfiguration("config_file")],
+            remappings=[('scan', 'scan_back')]
+        ),
+        Node(
+            package="main",
+            executable="lidar_merger",
+            name="lidar_merger_node",
+            namespace="sensors",
+            output="screen",
+            parameters=[LaunchConfiguration("config_file")],
+            remappings=[
+                ('scan_input1', 'scan_front'),
+                ('scan_input2', 'scan_back')
+            ]
         )
     ]
 
-    return LaunchDescription(launch_arguments + launches + nodes)
+    return LaunchDescription(launch_arguments + nodes)
