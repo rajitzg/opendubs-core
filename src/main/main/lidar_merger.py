@@ -40,9 +40,11 @@ class LidarMerger(Node):
         original_angles = scan_msg.angle_min + np.arange(ranges.size, dtype=np.float32) * scan_msg.angle_increment
         target_angles = np.arange(
             scan_msg.angle_min,
-            scan_msg.angle_max,
+            scan_msg.angle_max + target_increment,
             target_increment
         )
+        num_readings = round((scan_msg.angle_max - scan_msg.angle_min) / target_increment)
+        target_angles = target_angles[:num_readings]
 
         out_of_range = scan_msg.range_max + 1.0
         ranges[np.isinf(ranges)] = out_of_range
@@ -107,7 +109,7 @@ class LidarMerger(Node):
 
     # Convert transformed points back to ranges for the merged scan
     def points_to_ranges(self, points, scan_msg):
-        num_readings = int((scan_msg.angle_max - scan_msg.angle_min) / scan_msg.angle_increment)
+        num_readings = round((scan_msg.angle_max - scan_msg.angle_min) / scan_msg.angle_increment)
         ranges = [float('inf')] * num_readings
 
         for point in points:
@@ -117,10 +119,7 @@ class LidarMerger(Node):
             bx, by = point
 
             angle = math.atan2(by, bx)
-            idx = int(round((angle - scan_msg.angle_min) / scan_msg.angle_increment))
-
-            if idx < 0 or idx >= num_readings:
-                continue
+            idx = int(round((angle - scan_msg.angle_min) / scan_msg.angle_increment)) % num_readings
 
             r = math.sqrt(bx * bx + by * by)
             if r < scan_msg.range_min or r > scan_msg.range_max:
