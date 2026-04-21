@@ -1,32 +1,36 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
+from launch.conditions import IfCondition
+from launch.conditions import UnlessCondition
+from launch.substitutions import Command
+from launch.substitutions import LaunchConfiguration
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+
 def generate_launch_description():
     default_model_path = PathJoinSubstitution([
-        FindPackageShare("descriptors"), "urdf", "open_dubs_description.urdf"
+        FindPackageShare('descriptors'), 'urdf', 'open_dubs_description.urdf'
     ])
     default_rviz_path = PathJoinSubstitution([
-        FindPackageShare("descriptors"), "rviz", "config.rviz"
+        FindPackageShare('descriptors'), 'rviz', 'config.rviz'
     ])
 
     launch_arguments = [
         DeclareLaunchArgument(
-            name='gui', 
-            default_value='True', 
+            name='gui',
+            default_value='True',
             description='Flag to enable joint_state_publisher_gui'
         ),
         DeclareLaunchArgument(
-            name='model', 
-            default_value=default_model_path, 
+            name='model',
+            default_value=default_model_path,
             description='Absolute path to robot model file'
         ),
         DeclareLaunchArgument(
-            name='rvizconfig', 
-            default_value=default_rviz_path, 
+            name='rvizconfig',
+            default_value=default_rviz_path,
             description='Absolute path to rviz config file'
         ),
     ]
