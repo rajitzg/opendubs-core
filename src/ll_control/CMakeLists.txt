@@ -15,6 +15,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -44,9 +45,17 @@ ament_target_dependencies(pixhawk_processing_node
   message_filters
 )
 
+add_executable(optical_flow_LED_control_node src/optical_flow_LED_control.cpp)
+ament_target_dependencies(optical_flow_LED_control_node
+  rclcpp
+  mavros_msgs
+  rcl_interfaces
+)
+
 install(TARGETS
   ll_control_node
   pixhawk_processing_node
+  optical_flow_LED_control_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

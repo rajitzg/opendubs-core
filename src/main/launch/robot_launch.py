@@ -1,24 +1,29 @@
 import os
+
 from launch import LaunchDescription
-from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription
 from launch.conditions import UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
+
 def generate_launch_description():
-    
-    os.system('usbreset "ChibiOS/RT Virtual COM Port"')
-    
+
+    os.system("usbreset 'ChibiOS/RT Virtual COM Port'")
+
     default_config_path = PathJoinSubstitution([
-        FindPackageShare("main"), "config", "robot_params.yaml"
+        FindPackageShare('main'), 'config', 'robot_params.yaml'
     ])
-    
+
     launch_arguments = [
-        DeclareLaunchArgument("config_file", default_value=default_config_path),
-        DeclareLaunchArgument("debug_mode", default_value="false") # Debug mode will skip launching MAVROS and disable interactions with it in ll_control
+        DeclareLaunchArgument('config_file', default_value=default_config_path),
+        # Debug mode will skip launching MAVROS and disable interactions with it in ll_control
+        DeclareLaunchArgument('debug_mode', default_value='false')
     ]
-    
+
     launches = [
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -26,9 +31,9 @@ def generate_launch_description():
                     FindPackageShare('teleop_interface'), 'launch', 'teleop_interface_launch.py'
                 ])
             ]),
-            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
+            condition=UnlessCondition(LaunchConfiguration('debug_mode')),
             launch_arguments={
-                'config_file': LaunchConfiguration("config_file")
+                'config_file': LaunchConfiguration('config_file')
             }.items()
         ),
         IncludeLaunchDescription(
@@ -37,9 +42,9 @@ def generate_launch_description():
                     FindPackageShare('ll_control'), 'launch', 'll_control_launch.py'
                 ])
             ]),
-            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
+            condition=UnlessCondition(LaunchConfiguration('debug_mode')),
             launch_arguments={
-                'config_file': LaunchConfiguration("config_file")
+                'config_file': LaunchConfiguration('config_file')
             }.items()
         ),
         IncludeLaunchDescription(
@@ -48,8 +53,8 @@ def generate_launch_description():
                     FindPackageShare('main'), 'launch', 'mavros_launch.py'
                 ])
             ]),
-            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
-            launch_arguments={'config_file': LaunchConfiguration("config_file")}.items()
+            condition=UnlessCondition(LaunchConfiguration('debug_mode')),
+            launch_arguments={'config_file': LaunchConfiguration('config_file')}.items()
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -57,7 +62,7 @@ def generate_launch_description():
                     FindPackageShare('main'), 'launch', 'sensor_launch.py'
                 ])
             ]),
-            condition=UnlessCondition(LaunchConfiguration("debug_mode")),
+            condition=UnlessCondition(LaunchConfiguration('debug_mode')),
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -80,9 +85,9 @@ def generate_launch_description():
                 ])
             ]),
             launch_arguments={
-                'config_file': LaunchConfiguration("config_file"),
+                'config_file': LaunchConfiguration('config_file'),
             }.items()
         )
     ]
-    
+
     return LaunchDescription(launch_arguments + launches)

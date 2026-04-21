@@ -1,10 +1,13 @@
-import rclpy
-from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
 from enum import IntEnum
 
-from mavros_msgs.msg import RCIn
 from geometry_msgs.msg import Twist
+from mavros_msgs.msg import RCIn
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import ReliabilityPolicy
 from std_msgs.msg import Int8
 
 
@@ -15,6 +18,7 @@ class ControlMode(IntEnum):
 
 
 class ControllerInterfaceNode(Node):
+
     def __init__(self):
         super().__init__('controller_interface_node')
 
@@ -104,8 +108,13 @@ class ControllerInterfaceNode(Node):
             controller_on = (ch[self._throttle_ch] != self._throttle_idle)
             if controller_on != self._controller_connected:
                 self._controller_connected = controller_on
+                state = (
+                    'connected'
+                    if controller_on
+                    else 'DISCONNECTED - halting cmd_vel.'
+                )
                 self.get_logger().info(
-                    f'Controller {"connected" if controller_on else "DISCONNECTED - halting cmd_vel."}'
+                    f'Controller {state}'
                 )
 
         # Only publish cmd_vel if the controller is live.
@@ -115,7 +124,7 @@ class ControllerInterfaceNode(Node):
             return
 
         # Record the time we last received useful data (always update so ll_control
-        # can detect a complete topic dropout as "stale").
+        # can detect a complete topic dropout as 'stale').
         self._last_rc_time = self.get_clock().now()
 
         # --- Control Mode ---
@@ -170,6 +179,7 @@ class ControllerInterfaceNode(Node):
         msg = Int8()
         msg.data = int(mode)
         self._mode_pub.publish(msg)
+
 
 def main(args=None):
     rclpy.init(args=args)

@@ -1,6 +1,5 @@
-from setuptools import find_packages, setup
-from glob import glob
-import os
+from setuptools import find_packages
+from setuptools import setup
 
 package_name = 'data_logging'
 
@@ -15,7 +14,7 @@ setup(
         ('share/' + package_name + '/launch', [
             'launch/bag_recorder_launch.py',
         ])
-    ],  
+    ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='fadag',

@@ -41,6 +41,11 @@ ll_control:
       imu_fix_period: 2.0
       imu_freq_threshold: 0.9
       imu_target_freq: 50.0
+  optical_flow_LED_control_node:
+    ros__parameters:
+      servo_channel: 5
+      brightness: 0.5 
+      publish_rate: 1.0
 
 teleop_interface:
   controller_interface_node:
