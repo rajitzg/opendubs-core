@@ -43,7 +43,7 @@ ll_control:
       imu_target_freq: 50.0
   optical_flow_LED_control_node:
     ros__parameters:
-      servo_channel: 5
+      servo_channel: 11
       brightness: 0.5 
       publish_rate: 1.0
 
