@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "colcon build --symlink-install && source ~/.bashrc",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "foxglove",
+            "type": "shell",
+            "command": "ros2 launch foxglove_bridge foxglove_bridge_launch.xml",
+            "problemMatcher": []
+        },
+        {
+            "label": "odom",
+            "type": "shell",
+            "command": "ros2 launch open_dubs_mocap odom_publisher_launch.py",
+            "problemMatcher": []
+        },
+        {
+            "label": "isort",
+            "type": "shell",
+            "command": "isort src/",
+            "problemMatcher": []
+        }
+    ]
+}

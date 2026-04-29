@@ -56,5 +56,6 @@ CATKIN_IGNORE
 # Ignore rosbags
 src/data_logging/rosbags/
 
-.vscode
+.vscode/c_cpp_properties.json
+.vscode/settings.json
 *.code-workspace

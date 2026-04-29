@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ROS2 Launch Robot",
+            "type": "python",
+            "request": "launch",
+            "module": "ros2",
+            "args": [
+                "launch",
+                "main",
+                "robot_launch.py"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
